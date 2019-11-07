@@ -23,13 +23,14 @@ def init_db(ip, user, pw, db_name):
     db_cur = mydb.cursor()
     try:
         db_cur.execute("""CREATE TABLE `coin_base` (
-            `index` int(11) NOT NULL AUTO_INCREMENT,
+            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `index` varchar(45) DEFAULT NULL,
             `name` varchar(45) DEFAULT NULL,
             `name_en` varchar(45) DEFAULT NULL,
             `name_cn` varchar(45) DEFAULT NULL,
             `official_website` text,
             `description` text,
-            PRIMARY KEY (`index`),
+            PRIMARY KEY (`id`),
             UNIQUE KEY `name_UNIQUE` (`name`)
             ) ENGINE=InnoDB AUTO_INCREMENT=57 DEFAULT CHARSET=utf8;
             """)
@@ -41,8 +42,9 @@ def append_coin_info_2_db(coin_info):
     threadLock.acquire()
     global db_cur
     sql_str = """
-        insert into `coin_base` values(DEFAULT,'%s','%s','%s','%s','%s') 
-        """%(coin_info.name, 
+        insert into `coin_base` values(DEFAULT,'%s','%s','%s','%s','%s','%s') 
+        """%(coin_info.index, 
+        coin_info.name, 
         coin_info.name_en, 
         coin_info.name_cn,
         coin_info.official_website,
@@ -82,9 +84,10 @@ def url_open(url):
             return response
         except:
             print("url:%s open errer retry"%(url))
+
 def get_basic_info(page_size = 100, page_start = 0, page_count = 1):
     for page_idx in range(page_start, page_start+page_count):
-        url = "https://web-market.niuyan.com/web/v1/coins?pagesize="+str(page_size)+"&offset="+str(page_size*page_idx)+"&lan=zh-cn";
+        url = "https://h5-market.niuyan.com/web/v3/coin/list?pagesize="+str(page_size)+"&offset="+str(page_size*page_idx)+"&lan=zh-cn";
         response = url_open(url)
         print(url)
         if response.status ==200:
@@ -99,54 +102,46 @@ def get_basic_info(page_size = 100, page_start = 0, page_count = 1):
         #print(info)
         for i in range(0, len(json_data['data']['data'])):
             coin = coin_info(info[i][2], info[i][0], info[i][1], info[i][4], info[i][5], info[i][7]);   
-            coin.official_website = get_official_website(coin.name)
-            coin.description = get_description(coin.name)
+            coin.official_website,coin.description = get_official_website_and_description(coin.name)
             append_coin_info_2_db(coin)
             
 
 #通过coin_name拼接网址，获取官方网站
+def get_official_website_and_description(coin_name):
+    url ="https://h5-market.niuyan.com/web/v3/coin/intro?coin_id="+coin_name+"&lan=zh-cn"
+    response = url_open(url)
+    json_data = json.loads(response.read().decode('utf-8'))
+    web=""
+    des=""
+    if json_data["code"] == 0:
+        des = json_data["data"]["intro"]
+        if json_data["data"]["official_website"]:
+            web = json_data["data"]["official_website"][0]
+    return web,des
+
+"""
 def get_official_website(coin_name):
-    url = "https://niuyan.com/zh/currencies/"+coin_name
+    url = "https://www.niuyan.com/zh/currencies/intro/"+coin_name
     response = url_open(url)
     if response.status ==200:
         print('get_official_website seccess!')
     else:
         print('get_official_website faild!')
         return
-    web_source = response.read().decode('utf-8')
-    flag_str = '''"websites":"'''
-    index_begin = web_source.find(flag_str, 0)+len(flag_str)
-    if index_begin == -1:
-        return
-    index_end = web_source.find("\"", index_begin)
-    if index_end == -1:
-        return
-    rtn = web_source[index_begin: index_end]
-    rtn = rtn.replace("\\u002F", "\\")
-    return rtn
+    doc = pq(response.read().decode('utf-8'))
+    for item in doc("a").items():
+        if item.text()=="网站1":
+            print(item.attr("href"))
+            return item.attr("href")
+    return ""
 
 def get_description(coin_name):
-    url = "https://niuyan.com/zh/currencies/"+coin_name
+    url = "https://h5-market.niuyan.com/web/v3/coin/price/info?coin_id="+coin_name+"&lan=zh-cn"
     response = url_open(url)
-    
-    if response.status ==200:
-        print('get_description seccess!')
-    else:
-        print('get_description faild!')
-        return
-    web_source = response.read().decode('utf-8')
-    flag_str = '''"description":"'''
-    index_begin = web_source.find(flag_str)
-    if index_begin == -1:
-        return
-    index_begin += len(flag_str)
-    index_end = web_source.find('''","''', index_begin)
-    if index_end == -1:
-        return
-    rtn = web_source[index_begin: index_end]
-    return rtn
+    json_data = json.loads(response.read().decode('utf-8'))
+    return json_data["data"]["desc"]
 
-
+"""
 #get_basic_info(page_size = 100, page_start = 0, page_count = 1):
 class myThread (threading.Thread):
     page_size = 0
@@ -170,7 +165,7 @@ def StartCrawl(thread_count,page_count):
     for i in range(thread_count):
         if i >= page_count:
             break
-        thread_list.append(myThread(5, i, 1))
+        thread_list.append(myThread(50, i, 1))
         thread_list[i].start()
         will_crawl.pop(0)
 
@@ -182,7 +177,7 @@ def StartCrawl(thread_count,page_count):
             break
         for i in range(len(thread_list)):
             if thread_list[i].is_alive() == False:
-                thread_list[i] = myThread(5, will_crawl.pop(0), 1)
+                thread_list[i] = myThread(50, will_crawl.pop(0), 1)
                 thread_list[i].start()
         time.sleep(1)
     print("over")
@@ -190,5 +185,6 @@ def StartCrawl(thread_count,page_count):
 
 #print(get_description("bitcoin"))
 init_db("localhost", "user1", "123", "coin")
-StartCrawl(4, 20)
+StartCrawl(20, 72)
+#get_official_website("bitcoin")
 
