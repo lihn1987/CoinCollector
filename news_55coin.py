@@ -20,6 +20,7 @@ def url_open(url):
 
 def get_news(page_count, cb):
     time_utc = int(time.time())
+    error_count = 0
     for i in range(1,page_count+1):
         response = url_open("https://www.55coin.com/index/article/search.html?cat_id=4&page=%d&is_index=1"%(i))
         #print(response)
@@ -36,7 +37,14 @@ def get_news(page_count, cb):
             source_responce = url_open(article_item.source_addr)
             source_doc = pq(source_responce)
             article_item.content = source_doc(".article-content").html()
-            cb(article_item)
+            if not cb(article_item):
+                error_count+=1
+            else:
+                error_count = 0
+            if error_count >= 5:
+                break
+        if error_count >= 5:
+            break
         #print(json_data['results'][0])
 
 #def get_news(10)

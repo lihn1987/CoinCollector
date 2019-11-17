@@ -20,6 +20,7 @@ def url_open(url):
 
 def get_news(page_count, cb):
     time_utc = int(time.time())
+    error_count = 0
     index = 0
     for i in range(1,page_count+1):
         #print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
@@ -39,9 +40,16 @@ def get_news(page_count, cb):
                 "金色财金")
             source_responce = url_open(article_item.source_addr)
             source_doc = pq(source_responce)
-            article_item.content = source_doc(".js-article-detail").html()
+            article_item.content = source_doc(".js-article-detail").html() if source_doc(".js-article-detail").html() else source_doc(".js-article").html()
             index = item['id']
-            cb(article_item)
+            if not cb(article_item):
+                error_count+=1
+            else:
+                error_count = 0
+            if error_count >= 5:
+                break
+        if error_count >= 5:
+            break
         #print(json_data['results'][0])
 
 #def get_news(10)

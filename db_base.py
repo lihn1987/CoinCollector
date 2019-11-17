@@ -41,14 +41,26 @@ def insert_article(article_item):
             article_item.source_media.replace("'","""\'"""),
             article_item.source_addr.replace("'","""\'"""),
             article_item.content.replace("'","""\'"""))
-        print(sql)
+        print("add artical:"+article_item.source_media+":"+article_item.title)
         threadLock.acquire()
         db_cur.execute(sql)
         mydb.commit()
         threadLock.release()
-        print("insert %s ok~"%article_item.desc)
+        print("insert ok~")
+        return True
     except:
         threadLock.release()
+        
         print("insert error!")
+        return False
 
+def get_all_content():
+    db_cur.execute("select content from coin.article;")
+    fetch_list = db_cur.fetchall()
+    return fetch_list
+
+def get_all_coin():
+    db_cur.execute("select `name`,`name_en`, `name_cn` from coin.coin_base;")
+    fetch_list = db_cur.fetchall()
+    return fetch_list
 threadLock = threading.Lock()

@@ -15,9 +15,10 @@ def url_open(url):
             response = urllib.request.urlopen(url=req, timeout=5).read().decode('utf-8')
             return response
         except :
-            print("chainnewscrawl except:".str(e))
+            print("chainnewscrawl except:")
 
 def get_news(page_count, cb):
+    error_count = 0
     time_utc = int(time.time())*1000
     for i in range(1,page_count+1):
         #print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
@@ -37,7 +38,14 @@ def get_news(page_count, cb):
             source_doc = pq(source_responce)
             article_item.content = source_doc(".m-i-bd").html()
             time_utc = item["releaseDate"]['time']
-            cb(article_item)
+            if not cb(article_item):
+                error_count+=1
+            else:
+                error_count = 0
+            if error_count >= 5:
+                break
+        if error_count >= 5:
+            break
             #print(article_item)
         #print(json_data['results'][0])
 
