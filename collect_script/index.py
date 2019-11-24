@@ -3,9 +3,13 @@ import time
 import article2coin_anylse
 import news_crawl
 while True:
+    print("开始抓取新闻>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
     news_crawl.run()
+    print("完成抓取新闻<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+    print("开始分析新闻>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
     article2coin_anylse.run()
     time.sleep(60*10) 
+    print("完成分析新闻<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
 
 
 '''
