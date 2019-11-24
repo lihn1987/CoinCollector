@@ -1,12 +1,3 @@
-
-import jieba
-import mysql.connector
-import db_base
-from pyquery import PyQuery as pq
-#初始化数据库
-db_base.init_db("localhost", "root", "", "coin")
-
-
 #初始化需要屏蔽的词
 del_word_list = set(
     ['','的',' ','，',', ',',','<','>','p','/','\u3000','\t','。','和','、','；',';','"', '-', ':', '=','\n',
@@ -88,44 +79,7 @@ del_word_list = set(
                '锁', '无需', '涉及', '确实', '一部分', 'D', '做出', '大部分', '成立', 
                '尤其', '特定', '率', '一起', '图', '如此', '强', '分别', 'target', '这里', '左右', 
                '为主', '的话', '非', '多少'])
-for i in range(10000):
-    del_word_list.add(str(i))
+
 #初始化需要定制的词语
+
 add_word_list=set(['区块链', '矿池','DeFi','联盟链','NetCloth','交易所','数字交易所'])
-db_coin_list = db_base.get_all_coin()
-for db_coin_row in db_coin_list:
-    for db_coin_item in db_coin_row:
-        add_word_list.add(db_coin_item.upper())
-add_word_list.remove('')
-
-
-#获取所有文章内容
-content_list = db_base.get_all_content()
-
-for word in add_word_list:
-    jieba.add_word(word.upper())
-word_anylse = {}
-#for i in range(len(content_list)):
-for i in range(len(content_list)):
-    word_list = jieba.cut(content_list[i][0], cut_all=False, HMM=False)
-    for word in list(word_list):
-        if word not in word_anylse:
-            word_anylse[word.upper()] = 1
-        else:
-            word_anylse[word.upper()] +=1
-
-    for word in del_word_list:
-        try:
-            del word_anylse[word.upper()]
-        except :
-            pass
-    print(str(i)+"/"+str(len(content_list)))
-#print(word_anylse)
-a = sorted(word_anylse.items(), key=lambda x: x[1], reverse=True)
-for_show = []
-for x in range(10000):
-    for_show.append(a[x][0])
-    if a[x][1] < 100:
-        break
-print(for_show)
-print(a[:200])

@@ -1,8 +1,8 @@
 <template>
   <div class="main">
     <Header :current=2 />
-    <CoinTable />
-    <CoinNews />
+    <CoinDescribeIntruduce :id="this.$route.params.id" />
+    <CoinNewsOnCoin :id="this.$route.params.id" />
     <Footer />
   </div>
 </template>
@@ -10,15 +10,16 @@
 import Vue from 'vue'
 import Header from '../Common/Header.vue'
 import Footer from '../Common/Footer.vue'
-import Body from '../Common/ErrorBody.vue'
-import CoinTable from './Item/CoinTable.vue'
-import CoinNews from './Item/CoinNews.vue'
+import CoinDescribeIntruduce from './Item/CoinDescribeIntruduce'
+import CoinNewsOnCoin from './Item/CoinNewsOnCoin'
 Vue.component('Header', Header)
+Vue.component('CoinDescribeIntruduce', CoinDescribeIntruduce)
+Vue.component('CoinNewsOnCoin', CoinNewsOnCoin)
 Vue.component('Footer', Footer)
-Vue.component('CoinTable', CoinTable)
-Vue.component('CoinNews', CoinNews)
+
+
 export default {
-  name: 'Main',
+  name: 'CoinDescrebe',
   data () {
     return {
       msg: 'Welcome to Your Vue.js App'

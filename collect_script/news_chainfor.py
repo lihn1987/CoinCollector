@@ -33,7 +33,7 @@ def get_news(page_count, cb):
                 item["introduction"],#
                 'content', 
                 "https://www.chainfor.com/news/show/%d.html"%item["id"],
-                "金色财金")
+                "链向财经")
             source_responce = url_open(article_item.source_addr)
             source_doc = pq(source_responce)
             article_item.content = source_doc(".m-i-bd").html()

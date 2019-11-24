@@ -19,8 +19,7 @@ class myThread (threading.Thread):
         self.func(self.arg1, self.arg2)
         print ("退出线程：" + self.name)
 
-db_base.init_db("127.0.0.1", "user1", "123", "coin")
-db_base.init_news_base()
+db_base.init_db()
 
 thread_list = [
     myThread(news_55coin.get_news, 10, db_base.insert_article),
