@@ -1,5 +1,5 @@
 var server_config = {
-    url: 'a.com',
+    url: '/',
     port: '80'
 }
 export {

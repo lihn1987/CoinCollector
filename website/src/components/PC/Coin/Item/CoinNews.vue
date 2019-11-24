@@ -40,7 +40,7 @@ export default {
   },methods:{
     GetPage(page_idx){
       var size = 10;
-      var url = "http://"+server_config.url+":"+server_config.port+"/back/getnews.php?&offset="+(page_idx*size)+"&size="+size;;
+      var url = server_config.url+":"+server_config.port+"/back/getnews.php?&offset="+(page_idx*size)+"&size="+size;;
       axios.get(
         url,
         {

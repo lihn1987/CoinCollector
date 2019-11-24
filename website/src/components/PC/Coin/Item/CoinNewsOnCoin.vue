@@ -43,7 +43,7 @@ export default {
   },methods:{
     GetPage(page_idx){
       var size = 10;
-      var url = "http://"+server_config.url+":"+server_config.port+"/back/getnewsbycoinid.php?&offset="+(page_idx*size)+"&size="+size+"&coin_id="+this.$props.id;
+      var url = server_config.url+":"+server_config.port+"/back/getnewsbycoinid.php?&offset="+(page_idx*size)+"&size="+size+"&coin_id="+this.$props.id;
       axios.get(
         url,
         {
