@@ -45,7 +45,7 @@ export default {
     pageChange(pInfo){
       
       console.log(pInfo);//{pageNumber: 1, pageSize: 10}
-      var url = server_config.url+":"+server_config.port+"/back/getcoinbase.php?method=get_all&page_idx="+((pInfo.pageNumber-1)*pInfo.pageSize)+"&page_size="+pInfo.pageSize;
+      var url = server_config.url+"/back/getcoinbase.php?method=get_all&page_idx="+((pInfo.pageNumber-1)*pInfo.pageSize)+"&page_size="+pInfo.pageSize;
       axios.get(
         url,
         {

@@ -28,7 +28,7 @@ export default {
     }
   },
   created: function(){
-    var url = server_config.url+":"+server_config.port+"/back/getcoinbase.php?method=get_description&id="+this.$props.id;
+    var url = server_config.url+"/back/getcoinbase.php?method=get_description&id="+this.$props.id;
       axios.get(
         url,
         {
