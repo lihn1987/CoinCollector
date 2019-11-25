@@ -1,6 +1,6 @@
 var server_config = {
-    //url: 'http://a.com',
-    url: '',
+    url: 'http://a.com',
+    //url: '',
     port: '80'
 }
 export {

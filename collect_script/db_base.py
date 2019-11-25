@@ -16,6 +16,7 @@ def init_db(ip="localhost", user="root", pw="", db_name="coin"):
     init_coin_base()
     init_news_base()
     init_article2coinbase()
+    init_market_base_common()
 
 def init_coin_base():
     print("init db")
@@ -69,7 +70,27 @@ def init_news_base():
         print("db_init ok")
     except:
         print("base table already exist")
-    
+
+def init_market_base_common():
+    try:
+        db_cur.execute("""CREATE TABLE `coin`.`market_base_common`  (
+            `id` int(0) NULL AUTO_INCREMENT,
+            `coin_name` varchar(255) NOT NULL COMMENT '交易币种',
+            `base_coin_name` varchar(255) NOT NULL COMMENT '报价币种',
+            `price_precision` integer(255) NULL COMMENT '报价精度',
+            `base_coin_precision` integer(255) NULL COMMENT '基础币种精度',
+            `amount_precision` integer(255) NULL COMMENT '交易金额精度',
+            `state` integer(255) NULL COMMENT '0可交易，1不可交易',
+            `min_order_amount` decimal(30, 15) NULL COMMENT '最小下单量',
+            `max_order_amount` decimal(30, 15) NULL COMMENT '最大下单量',
+            `min_order_price` decimal(30, 15) NULL COMMENT '最小下单金额',
+            `market` integer(255) NOT NULL COMMENT '0火币，1币安，2ok',
+            PRIMARY KEY (`market`, `coin_name`, `base_coin_name`),
+            INDEX `id`(`id`)
+            );""")
+        print("db_init ok")
+    except:
+        print("base table already exist")
 def insert_coin_info(index, name, name_en, name_cn, official_website, description):
     try:
         sql_str = """
@@ -137,6 +158,66 @@ def get_all_coin():
     db_cur.execute("select `id`, `name`,`name_en`, `name_cn` from coin.coin_base;")
     fetch_list = db_cur.fetchall()
     return fetch_list
+
+def insert_market_base_common(coin_name ,
+    base_coin_name,
+    price_precision,
+    base_coin_precision,
+    amount_precision,
+    state,
+    min_order_amount,
+    max_order_amount,
+    min_order_price,
+    market):
+    sql = "insert into market_base_common values(DEFAULT, '%s','%s',%d,%d,%d,%d,'%f','%f','%f',%d)"%(coin_name ,
+        base_coin_name,
+        price_precision,
+        base_coin_precision,
+        amount_precision,
+        state,
+        min_order_amount,
+        max_order_amount,
+        min_order_price,
+        market)
+    try:
+        db_cur.execute(sql)
+        mydb.commit()
+        print("交易对插入成功")
+        return True
+    except:
+        print("交易对插入失败")
+        sql = """update market_base_common set coin_name='%s', base_coin_name='%s', price_precision='%d',
+        base_coin_precision='%d',
+        amount_precision='%d',
+        state='%d',
+        min_order_amount='%f',
+        max_order_amount='%f',
+        min_order_price='%f',
+        market='%d' where coin_name='%s' and base_coin_name='%s' and market=%d"""%(coin_name ,
+        base_coin_name,
+        price_precision,
+        base_coin_precision,
+        amount_precision,
+        state,
+        min_order_amount,
+        max_order_amount,
+        min_order_price,
+        market,coin_name ,
+        base_coin_name,market)
+        try:
+            db_cur.execute(sql)
+            mydb.commit()
+            print("交易对更新成功")
+            return True
+        except:
+            print("交易对更新失败")
+            return False
+    
+
+
+
+
+
 
 
 threadLock = threading.Lock()

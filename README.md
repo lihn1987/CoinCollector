@@ -8,6 +8,7 @@
     - 金色财经
     - 链向财经
 - 能够分析每篇文章和哪个币种相关
+- 能够抓取火币，币安，ok的币种消息
 ## 前置环境
 ### 安装mysql
 ```
@@ -52,8 +53,14 @@ def init_db(ip="localhost", user="root", pw="", db_name="coin"):
 将其设置为自己的数据库连接字符串，主要是user（用户名）和pw（密码）
 默认情况下，连接字符串你不需要改
 ### 定期采集各个站点的新闻
+```
 python3 index.py
+```
 
+### 采集交易所币种消息
+```
+market_base_common_crawl.py
+```
 # 网站端
 ./website
 
