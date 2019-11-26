@@ -8,6 +8,22 @@ import websocket
 import redis
 import pickle
 import zlib
+import numpy
+class DepthInfo:
+    def __init__(self):
+        self.up_time=0
+        self.forbuy=[]
+        self.forsell=[]
+        self.order_coin=''
+        self.base_coin=''
+    def dump(self):
+        print('==================')
+        print(self.up_time)
+        print(self.forbuy)
+        print(self.forsell)
+        print(self.order_coin)
+        print(self.base_coin)
+
 class myThread (threading.Thread):
     def __init__(self, coin_list):
         threading.Thread.__init__(self)
@@ -16,12 +32,24 @@ class myThread (threading.Thread):
         self.ws = websocket.WebSocket()
         self.timer = None
         self.redis_db = redis.Redis(host='localhost', port=6379)
+        self.info = DepthInfo()
 
     def connect(self):
         self.ws.connect("wss://real.okex.com:8443/ws/v3", http_proxy_host="127.0.0.1", http_proxy_port=50617)
     def on_recv(self, str):
         print("recive:"+str)
+        self.reset_timer()
+        json_data = json.loads(str)
+        if 'event' not in json_data and json_data['action'] == 'partial':
+            self.info.order_coin = json_data['data'][0]['instrument_id'].split("-")[0]
+            self.info.base_coin = json_data['data'][0]['instrument_id'].split("-")[1]
+            self.info.forbuy = numpy.array(json_data['data'][0]['bids'])[:,0:2].tolist()
+            self.info.forsell = numpy.array(json_data['data'][0]['asks'])[:,0:2].tolist()
+            self.info.up_time = json_data['data'][0]['timestamp']
+            self.info.dump()
+            exit()
         '''
+        {"table":"spot/depth","action":"partial","data":[{"instrument_id":"BTC-USDT","asks":[["7091.8","2.03619305","4"],["7092.4","2","1"],["7092.6","0.00282049","1"],["7092.8","0.01","1"],["7092.9","0.001","1"],["7093.5","0.05318","2"],["7093.6","2.1028199","3"],["7093.7","0.0082","1"],["7093.8","0.00222058","1"],["7093.9","0.3","1"],["7094.4","0.2","1"],["7094.5","0.044","1"],["7094.7","2.03503541","2"],["7094.8","0.29","2"],["7095","0.1","1"],["7095.1","2","1"],["7095.5","0.813","1"],["7095.6","0.3","1"],["7095.8","0.0497179","1"],["7096","0.06877058","1"],["7096.7","1.284","2"],["7096.8","0.20414356","1"],["7097.4","0.28884094","1"],["7097.5","0.2","1"],["7097.7","0.04","1"],["7097.8","0.51932416","1"],["7098.1","0.02819483","1"],["7098.3","0.03","1"],["7098.4","5.1","1"],["7098.5","0.3","1"],["7098.6","1.12823123","1"],["7098.7","0.3","1"],["7099","0.99396707","4"],["7099.4","1.4101552","2"],["7099.5","0.0558562","1"],["7099.6","0.05638965","1"],["7099.7","0.074","1"],["7099
         self.reset_timer()
         json_data = json.loads(str)
         #对ping pong 的处理
@@ -33,6 +61,7 @@ class myThread (threading.Thread):
             print(self.coin_dict[json_data['ch'].split(".")[1].upper()])
             key = "0_"+self.coin_dict[json_data['ch'].split(".")[1].upper()][0]+"_"+self.coin_dict[json_data['ch'].split(".")[1].upper()][1]
             self.redis_db.set(key, pickle.dumps(json_data))
+            
         '''
     def shutdown(self):
         print("shutdown")
