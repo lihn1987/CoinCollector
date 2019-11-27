@@ -7,19 +7,7 @@ import gzip
 import websocket
 import redis
 import pickle
-class DepthInfo:
-    def __init__(self):
-        self.up_time=0
-        self.forbuy=[]
-        self.forsell=[]
-        self.order_coin=''
-        self.base_coin=''
-    def dump(self):
-        print(self.up_time)
-        print(self.forbuy)
-        print(self.forsell)
-        print(self.order_coin)
-        print(self.base_coin)
+from depth_info import DepthInfo
 
 class myThread (threading.Thread):
     def __init__(self, coin_list):
@@ -49,8 +37,9 @@ class myThread (threading.Thread):
             deep_info.base_coin = self.coin_dict[json_data['ch'].split(".")[1].upper()][1]
             deep_info.forbuy = json_data['tick']['bids']
             deep_info.forsell = json_data['tick']['asks']
+            deep_info.market = 0
             key = "0_"+self.coin_dict[json_data['ch'].split(".")[1].upper()][0]+"_"+self.coin_dict[json_data['ch'].split(".")[1].upper()][1]
-            self.redis_db.set(key, pickle.dumps(json_data))
+            self.redis_db.set(key, pickle.dumps(deep_info))
     def shutdown(self):
         print("shutdown")
         self.ws.shutdown()

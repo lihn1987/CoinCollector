@@ -9,21 +9,88 @@ import redis
 import pickle
 import zlib
 import numpy
-class DepthInfo:
-    def __init__(self):
-        self.up_time=0
-        self.forbuy=[]
-        self.forsell=[]
-        self.order_coin=''
-        self.base_coin=''
-    def dump(self):
-        print('==================')
-        print(self.up_time)
-        print(self.forbuy)
-        print(self.forsell)
-        print(self.order_coin)
-        print(self.base_coin)
+from depth_info import DepthInfo
 
+
+def OnChange(depth_info, change_info):
+    #修改卖盘
+    for_change = change_info['data'][0]['asks']
+    for_change.reverse()
+    for i in range(len(depth_info.forsell)-1, -1, -1):
+        while True:
+            if len(for_change) == 0 :
+                break
+            if len(for_change) != 0 and depth_info.forsell[i][0] == for_change[0][0] and for_change[0][1] == '0':
+                #需要删除的
+                depth_info.forsell.pop(i)
+                for_change.pop(0)
+                break
+
+            elif len(for_change) != 0 and depth_info.forsell[i][0] == for_change[0][0] and for_change[0][1] != '0':
+                #需要修改的
+                depth_info.forsell[i][1] = for_change[0][1]
+                for_change.pop(0)
+                continue
+        
+            elif len(for_change) != 0 and float(depth_info.forsell[i][0]) < float(for_change[0][0]):
+                depth_info.forsell.insert(i+1, for_change[0][0:2])
+                for_change.pop(0)
+                continue
+
+            break
+            
+        if len(for_change) == 0 :
+            break
+        if i == 0:
+            for_change.reverse()
+            if len(for_change):
+                depth_info.forsell = numpy.array(for_change)[:,0:2].tolist()+depth_info.forsell
+    #修改买盘
+    for_change = change_info['data'][0]['bids']
+    for_change.reverse()
+    for i in range(len(depth_info.forbuy)-1, -1, -1):
+        while True:
+            if len(for_change) == 0 :
+                break
+            if len(for_change) != 0 and depth_info.forbuy[i][0] == for_change[0][0] and for_change[0][1] == '0':
+                #需要删除的
+                print(len(depth_info.forbuy))
+                depth_info.forbuy.pop(i)
+                print(len(depth_info.forbuy))
+                for_change.pop(0)
+                print("del")
+                break
+
+            elif len(for_change) != 0 and depth_info.forbuy[i][0] == for_change[0][0] and for_change[0][1] != '0':
+                #需要修改的
+                depth_info.forbuy[i][1] = for_change[0][1]
+                for_change.pop(0)
+                print("modify")
+                continue
+        
+            elif len(for_change) != 0 and float(depth_info.forbuy[i][0]) > float(for_change[0][0]):
+                print(len(depth_info.forbuy))
+                depth_info.forbuy.insert(i+1, for_change[0][0:2])
+                print(for_change[0][0:2])
+                print(len(depth_info.forbuy))
+                print("insert")
+                for_change.pop(0)
+                continue
+
+            break
+            
+        if len(for_change) == 0 :
+            break
+        if i == 0:
+            for_change.reverse()
+            if len(for_change):
+                depth_info.forbuy = numpy.array(for_change)[:,0:2].tolist()+depth_info.forbuy
+
+    #depth_info.dump()
+    print("-----")
+
+
+    
 class myThread (threading.Thread):
     def __init__(self, coin_list):
         threading.Thread.__init__(self)
@@ -46,23 +113,13 @@ class myThread (threading.Thread):
             self.info.forbuy = numpy.array(json_data['data'][0]['bids'])[:,0:2].tolist()
             self.info.forsell = numpy.array(json_data['data'][0]['asks'])[:,0:2].tolist()
             self.info.up_time = json_data['data'][0]['timestamp']
+            self.info.market = 1
             self.info.dump()
-            exit()
-        '''
-        {"table":"spot/depth","action":"partial","data":[{"instrument_id":"BTC-USDT","asks":[["7091.8","2.03619305","4"],["7092.4","2","1"],["7092.6","0.00282049","1"],["7092.8","0.01","1"],["7092.9","0.001","1"],["7093.5","0.05318","2"],["7093.6","2.1028199","3"],["7093.7","0.0082","1"],["7093.8","0.00222058","1"],["7093.9","0.3","1"],["7094.4","0.2","1"],["7094.5","0.044","1"],["7094.7","2.03503541","2"],["7094.8","0.29","2"],["7095","0.1","1"],["7095.1","2","1"],["7095.5","0.813","1"],["7095.6","0.3","1"],["7095.8","0.0497179","1"],["7096","0.06877058","1"],["7096.7","1.284","2"],["7096.8","0.20414356","1"],["7097.4","0.28884094","1"],["7097.5","0.2","1"],["7097.7","0.04","1"],["7097.8","0.51932416","1"],["7098.1","0.02819483","1"],["7098.3","0.03","1"],["7098.4","5.1","1"],["7098.5","0.3","1"],["7098.6","1.12823123","1"],["7098.7","0.3","1"],["7099","0.99396707","4"],["7099.4","1.4101552","2"],["7099.5","0.0558562","1"],["7099.6","0.05638965","1"],["7099.7","0.074","1"],["7099
-        self.reset_timer()
-        json_data = json.loads(str)
-        #对ping pong 的处理
-        if 'ping' in json_data:
-            send_data = {'pong':json_data['ping']}
-            self.send_data(send_data)
-        elif 'ch' in json_data:
-            print(json_data['ch'].split(".")[1])
-            print(self.coin_dict[json_data['ch'].split(".")[1].upper()])
-            key = "0_"+self.coin_dict[json_data['ch'].split(".")[1].upper()][0]+"_"+self.coin_dict[json_data['ch'].split(".")[1].upper()][1]
-            self.redis_db.set(key, pickle.dumps(json_data))
-            
-        '''
+        elif 'event' not in json_data and json_data['action'] == 'update':
+            OnChange(self.info, json_data)
+            key = "1_"+json_data['data'][0]['instrument_id'].split("-")[0]+"_"+json_data['data'][0]['instrument_id'].split("-")[1]
+            self.redis_db.set(key, pickle.dumps(self.info))
+
     def shutdown(self):
         print("shutdown")
         self.ws.shutdown()
@@ -81,11 +138,11 @@ class myThread (threading.Thread):
     def reset_timer(self):
         if self.timer and self.timer.isAlive():
             self.timer.cancel()
-        self.timer = threading.Timer(6, self.shutdown)
+        self.timer = threading.Timer(5, self.shutdown)
         self.timer.start()
     def run(self):
         while True:
-            #try:
+            try:
                 print('-------0.1')
                 self.connect()
                 print('-------0.2')
@@ -109,7 +166,7 @@ class myThread (threading.Thread):
                     inflated = decompress.decompress(recv_data)
                     inflated += decompress.flush()
                     self.on_recv(inflated.decode())
-            #except:
+            except:
                 print("huobi socket error")
                 pass
 

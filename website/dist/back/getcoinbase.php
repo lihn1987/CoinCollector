@@ -16,6 +16,12 @@ require("db.php")
         $_GET['method'] == 'get_description')
     {
         $coin_base->getCoinDescribe($_GET["id"]);
+    }else if(
+        array_key_exists('method',$_GET) &&
+        array_key_exists('id',$_GET) &&
+        $_GET['method'] == 'get_coin_name_en')
+    {
+        $coin_base->getCoinNameEnByID($_GET["id"]);
     }
 
 ?>

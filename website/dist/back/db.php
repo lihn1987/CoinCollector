@@ -47,6 +47,17 @@ class CoinBase{
             }
         }
     }
+    function getCoinNameEnByID($id){
+        $sql = "select name_en from coin_base where `id` = ".$id;
+        $result = $this->db_conn->query($sql);
+        if ($result->num_rows > 0) {
+            // 输出数据
+            while($row = $result->fetch_assoc()) {
+                echo $row['name_en'];
+                return;
+            }
+        }
+    }
     function getNewsInfo($offset, $size){
         $rtn = array();
         $sql = "SELECT count(*) as `count` FROM article";
