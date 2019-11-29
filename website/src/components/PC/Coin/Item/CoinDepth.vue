@@ -1,7 +1,11 @@
 <template>
   <div>
-    <div class="title">深度行情</div>
-    <div class = "depth clearfix">
+    <div class ="title_content clearfix">
+      <div class="title left">深度行情</div>
+      <div class="show_btn left" v-on:click = "show = !show"> 展开/折叠</div>
+    </div>
+    <transition name="bounce">
+    <div v-if="show" class = "depth clearfix">
       <div class="left" v-for="n in 3" v-bind:class="{depth_item1:n==1,depth_item2:n==2,depth_item3:n==3}">
         <div>
           {{depth_item_title[n-1]}}
@@ -28,6 +32,7 @@
         </table>
       </div>
     </div>
+    </transition>
   </div>
 </template>
 <script> 
@@ -43,6 +48,7 @@ export default {
   },
   data () {
     return {
+      show:false,
       depth_item_title:["火币行情", "OK行情", "币安行情"],
       depth_data:[[[['-','-'],['-','-'],['-','-'],['-','-'],['-','-']],[['-','-'],['-','-'],['-','-'],['-','-'],['-','-']]],
         [[['-','-'],['-','-'],['-','-'],['-','-'],['-','-']],[['-','-'],['-','-'],['-','-'],['-','-'],['-','-']]],
@@ -138,6 +144,10 @@ function connect_websocket(coin){
           _this.$set(_this.depth_data[1],0,json_obj.forsell.slice(0,5).reverse());
           _this.$set(_this.depth_data[1],1,json_obj.forbuy.slice(0,5));
           //console.log(json_obj.forsell.slice(json_obj.forsell.length-5,json_obj.forsell.length))
+        }else if(json_obj.order_coin == coin_order && json_obj.market == 2){
+          _this.$set(_this.depth_data[2],0,json_obj.forsell.slice(0,5).reverse());
+          _this.$set(_this.depth_data[2],1,json_obj.forbuy.slice(0,5));
+          //console.log(json_obj.forsell.slice(json_obj.forsell.length-5,json_obj.forsell.length))
         }
     }
 }
@@ -163,10 +173,40 @@ function discnnect_websocket(){
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss" scoped>
 @import "../../../../style/index.scss";
+.title_content{
+  width:$content_width;
+  margin: 36px auto 0 auto;
+}
 .title {
   font-size:36px;
-  margin-top:36px;
   color:$green;
+}
+.bounce-enter-active {
+  animation: bounce-in .3s;
+}
+.bounce-leave-active {
+  animation: bounce-in .3s reverse;
+}
+@keyframes bounce-in {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.5);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.show_btn{
+  background:rgb(255,106,25);
+  font-size:18px;
+  color:rgb(255,255,255);
+  padding:4px 4px;
+  border-radius:4px;
+  margin-top:8px;
+  margin-left:48px;
 }
 .depth{
   width:$content_width;

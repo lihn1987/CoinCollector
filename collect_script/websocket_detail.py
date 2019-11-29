@@ -11,11 +11,16 @@ from SimpleWebSocketServer import SimpleWebSocketServer, WebSocket
 
 import trade_detail_huobi
 import trade_detail_ok
+import trade_detail_binance
 import db_base
 allow_channel = [(0, "BTC", "USDT"),(0, "ETH", "USDT"),(0, "XRP", "USDT"),(0, "BCH", "USDT"),(0, "LTC", "USDT"),(0, "EOS", "USDT"),(0, "BSV", "USDT"),(0, "XLM", "USDT"),(0, "TRX", "USDT"),(0, "ADA", "USDT"),
-                 (1, "BTC", "USDT"),(1, "ETH", "USDT"),(1, "XRP", "USDT"),(1, "BCH", "USDT"),(1, "LTC", "USDT"),(1, "EOS", "USDT"),(1, "BSV", "USDT"),(1, "XLM", "USDT"),(1, "TRX", "USDT"),(1, "ADA", "USDT")]
+                 (1, "BTC", "USDT"),(1, "ETH", "USDT"),(1, "XRP", "USDT"),(1, "BCH", "USDT"),(1, "LTC", "USDT"),(1, "EOS", "USDT"),(1, "BSV", "USDT"),(1, "XLM", "USDT"),(1, "TRX", "USDT"),(1, "ADA", "USDT"),
+                 (2, "BTC", "USDT"),(2, "ETH", "USDT"),(2, "XRP", "USDT"),(2, "BCH", "USDT"),(2, "LTC", "USDT"),(2, "EOS", "USDT"),(2, "BSV", "USDT"),(2, "XLM", "USDT"),(2, "TRX", "USDT"),(2, "ADA", "USDT")]
 clients = []
 detail_client = {}
+
+for item in allow_channel:
+    detail_client[item] = []
 redis_db = redis.Redis(host='localhost', port=6379)
 threadLock = threading.Lock()
 detail_lock = threading.Lock()
@@ -37,7 +42,7 @@ def detail_callback(key, info_list):
 
 trade_detail_huobi.run(detail_callback)
 trade_detail_ok.run(detail_callback)
-
+trade_detail_binance.run(detail_callback)
 
 
 class SimpleChat(WebSocket):
@@ -95,6 +100,7 @@ class myThread (threading.Thread):
                 #遍历订阅频道
                 if len(detail_client[key]) == 0 or (key[0], key[1].upper(), key[2].upper()) not in trade_detail:
                     #订阅者为0的直接滚
+                    trade_detail[(key[0], key[1].upper(), key[2].upper())] = []
                     continue
                 #获取订阅信息
                 detail_lock.acquire()
@@ -110,11 +116,11 @@ class myThread (threading.Thread):
                     #将订阅信息发送给每个没断开的订阅者
                     if detail_client[key][i][0].closed == True:
                         detail_client[key].pop(i)
-                        print(detail_client)
+                        #print(detail_client)
                         continue
                     #print(str_for_send)
                     if len(tmp):
-                        print(str_for_send)
+                        #print(str_for_send)
                         detail_client[key][i][0].sendMessage(str_for_send)
             threadLock.release()
             #print("发送订阅")

@@ -1,10 +1,10 @@
 <template>
   <div class="main">
     <Header :current=2 />
+    <CoinDescribeIntruduce :id="this.$route.params.id" />
     <CoinDepth :id="this.$route.params.id" />
     <CoinDetail :id="this.$route.params.id" />
     <CoinTradeInfo :id="this.$route.params.id" />
-    <CoinDescribeIntruduce :id="this.$route.params.id" />
     <CoinNewsOnCoin :id="this.$route.params.id" />
     <Footer />
   </div>

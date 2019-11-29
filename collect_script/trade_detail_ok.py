@@ -111,7 +111,7 @@ class myThread (threading.Thread):
         self.redis_db = redis.Redis(host='localhost', port=6379)
         self.callback = callback
     def connect(self):
-        self.ws.connect("wss://real.okex.com:8443/ws/v3", http_proxy_host="127.0.0.1", http_proxy_port=50617)
+        self.ws.connect("wss://real.okex.com:8443/ws/v3", http_proxy_host="127.0.0.1", http_proxy_port=1087)
     def on_recv(self, str):
         self.reset_timer()
         json_data = json.loads(str)
@@ -170,10 +170,9 @@ class myThread (threading.Thread):
                     inflated += decompress.flush()
                     self.on_recv(inflated.decode())
             except:
-                print("huobi socket error")
+                print("ok socket error")
                 pass
-coin_list=[("BTC", "USDT"),("ETH", "USDT"),("XRP", "USDT"),("BCH", "USDT"),("LTC", "USDT"),("EOS", "USDT"),("BSV", "USDT"),("XLM", "USDT"),("TRX", "USDT"),("ADA", "USDT"),
-                 ("BTC", "USDT"),("ETH", "USDT"),("XRP", "USDT"),("BCH", "USDT"),("LTC", "USDT"),("EOS", "USDT"),("BSV", "USDT"),("XLM", "USDT"),("TRX", "USDT"),("ADA", "USDT")]
+coin_list=[("BTC", "USDT"),("ETH", "USDT"),("XRP", "USDT"),("BCH", "USDT"),("LTC", "USDT"),("EOS", "USDT"),("BSV", "USDT"),("XLM", "USDT"),("TRX", "USDT"),("ADA", "USDT")]
 def run(detail_callback):
     thread_ = myThread(coin_list, detail_callback)
     thread_.start()

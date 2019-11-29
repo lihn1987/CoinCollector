@@ -19,7 +19,7 @@ class myThread (threading.Thread):
         self.redis_db = redis.Redis(host='localhost', port=6379)
 
     def connect(self):
-        self.ws.connect("wss://api.huobi.pro/ws", http_proxy_host="127.0.0.1", http_proxy_port=50617)
+        self.ws.connect("wss://api.huobi.pro/ws", http_proxy_host="127.0.0.1", http_proxy_port=1087)
     def on_recv(self, str):
         self.reset_timer()
         json_data = json.loads(str)
@@ -79,8 +79,7 @@ class myThread (threading.Thread):
                 print("huobi socket error")
                 pass
 
-coin_list=[("BTC", "USDT"),("ETH", "USDT"),("XRP", "USDT"),("BCH", "USDT"),("LTC", "USDT"),("EOS", "USDT"),("BSV", "USDT"),("XLM", "USDT"),("TRX", "USDT"),("ADA", "USDT"),
-                 ("BTC", "USDT"),("ETH", "USDT"),("XRP", "USDT"),("BCH", "USDT"),("LTC", "USDT"),("EOS", "USDT"),("BSV", "USDT"),("XLM", "USDT"),("TRX", "USDT"),("ADA", "USDT")]
+coin_list=[("BTC", "USDT"),("ETH", "USDT"),("XRP", "USDT"),("BCH", "USDT"),("LTC", "USDT"),("EOS", "USDT"),("BSV", "USDT"),("XLM", "USDT"),("TRX", "USDT"),("ADA", "USDT")]
 
 def StartCrwal():
     thread_ = myThread(coin_list)

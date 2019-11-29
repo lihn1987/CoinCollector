@@ -1,25 +1,30 @@
 <template>
   <div>
-    <div class="title">成交记录</div>
-    <div class = "depth clearfix">
-      <div class="left" v-for="n in 3" v-bind:class="{depth_item1:n==1,depth_item2:n==2,depth_item3:n==3}">
-        <div>
-          {{depth_item_title[n-1]}}
-        </div>
-        <table class="table_sell">
-          <tr>
-            <th class="depth_head1">交易时间</th>
-            <th class="depth_head2">价格(USDT)</th>
-            <th class="depth_head3">数量</th>
-          </tr>
-          <tr v-for="i in 10" v-bind:class="{green:depth_data[n-1][i-1][3]==0}">
-            <td >{{utc2beijing(depth_data[n-1][i-1][0]).toString()}}</td>
-            <td >{{(depth_data[n-1][i-1][1]).toString().substring(0,10)}}</td>
-            <td >{{(depth_data[n-1][i-1][2]).toString().substring(0,10)}}</td>
-          </tr>
-        </table>
-      </div>
+    <div class ="title_content clearfix">
+      <div class="title left">成交记录</div>
+      <div class="show_btn left" v-on:click = "show = !show"> 展开/折叠</div>
     </div>
+    <transition name="bounce">
+      <div v-if="show" class = "depth clearfix">
+        <div class="left" v-for="n in 3" v-bind:class="{depth_item1:n==1,depth_item2:n==2,depth_item3:n==3}">
+          <div>
+            {{depth_item_title[n-1]}}
+          </div>
+          <table class="table_sell">
+            <tr>
+              <th class="depth_head1">交易时间</th>
+              <th class="depth_head2">价格(USDT)</th>
+              <th class="depth_head3">数量</th>
+            </tr>
+            <tr v-for="i in 10" v-bind:class="{green:depth_data[n-1][i-1][3]==0}">
+              <td >{{utc2beijing(depth_data[n-1][i-1][0]).toString()}}</td>
+              <td >{{(depth_data[n-1][i-1][1]).toString().substring(0,10)}}</td>
+              <td >{{(depth_data[n-1][i-1][2]).toString().substring(0,10)}}</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 <script> 
@@ -35,6 +40,7 @@ export default {
   },
   data () {
     return {
+      show : false,
       depth_item_title:["火币最新交易", "OK最新交易", "币安最新交易"],
       depth_data:[]
     }
@@ -72,7 +78,6 @@ export default {
   },methods:{
     utc2beijing(utc_datetime) {
       if(utc_datetime == '-')return'-';
-      //return utc_datetime;
       var d = new Date(parseInt(utc_datetime));
       return (d.getHours().toString().length == 1?"0":"")+d.getHours().toString()+":"+(d.getMinutes().toString().length == 1?"0":"")+d.getMinutes().toString()+":"+(d.getSeconds().toString().length == 1?"0":"")+d.getSeconds().toString();
   }
@@ -145,6 +150,14 @@ function connect_websocket(coin){
           tmp_array = tmp_array.reverse();
           tmp_array = tmp_array.concat(_this.depth_data[1]);
           _this.$set(_this.depth_data,1,tmp_array.slice(0,10));
+        }else if(json_obj.order_coin == coin_order && json_obj.market == 2){
+          var tmp_array = [];
+          for(var item in json_obj.data){
+            tmp_array.push([json_obj.data[item].trade_time, json_obj.data[item].price, json_obj.data[item].amount, json_obj.data[item].dir]);
+          }
+          tmp_array = tmp_array.reverse();
+          tmp_array = tmp_array.concat(_this.depth_data[1]);
+          _this.$set(_this.depth_data,2,tmp_array.slice(0,10));
         }
     }
 }
@@ -172,10 +185,39 @@ function discnnect_websocket(){
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss" scoped>
 @import "../../../../style/index.scss";
+.title_content{
+  width:$content_width;
+  margin: 36px auto 0 auto;
+}
 .title {
   font-size:36px;
-  margin-top:36px;
   color:$green;
+}
+.bounce-enter-active {
+  animation: bounce-in .3s;
+}
+.bounce-leave-active {
+  animation: bounce-in .3s reverse;
+}
+@keyframes bounce-in {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.5);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.show_btn{
+  background:rgb(255,106,25);
+  font-size:18px;
+  color:rgb(255,255,255);
+  padding:4px 4px;
+  border-radius:4px;
+  margin-top:8px;
+  margin-left:48px;
 }
 .depth{
   width:$content_width;

@@ -10,7 +10,8 @@ from depth_info import DepthInfo
 from SimpleWebSocketServer import SimpleWebSocketServer, WebSocket
 
 allow_channel = [(0, "BTC", "USDT"),(0, "ETH", "USDT"),(0, "XRP", "USDT"),(0, "BCH", "USDT"),(0, "LTC", "USDT"),(0, "EOS", "USDT"),(0, "BSV", "USDT"),(0, "XLM", "USDT"),(0, "TRX", "USDT"),(0, "ADA", "USDT"),
-                 (1, "BTC", "USDT"),(1, "ETH", "USDT"),(1, "XRP", "USDT"),(1, "BCH", "USDT"),(1, "LTC", "USDT"),(1, "EOS", "USDT"),(1, "BSV", "USDT"),(1, "XLM", "USDT"),(1, "TRX", "USDT"),(1, "ADA", "USDT")]
+                 (1, "BTC", "USDT"),(1, "ETH", "USDT"),(1, "XRP", "USDT"),(1, "BCH", "USDT"),(1, "LTC", "USDT"),(1, "EOS", "USDT"),(1, "BSV", "USDT"),(1, "XLM", "USDT"),(1, "TRX", "USDT"),(1, "ADA", "USDT"),
+                 (2, "BTC", "USDT"),(2, "ETH", "USDT"),(2, "XRP", "USDT"),(2, "BCH", "USDT"),(2, "LTC", "USDT"),(2, "EOS", "USDT"),(2, "BSV", "USDT"),(2, "XLM", "USDT"),(2, "TRX", "USDT"),(2, "ADA", "USDT")]
 clients = []
 depth_client = {}
 redis_db = redis.Redis(host='localhost', port=6379)

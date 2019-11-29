@@ -1,45 +1,50 @@
 <template>
   <div>
-    <div class="title">分析</div>
-    <div class = "depth clearfix">
-      <div class="left" v-for="n in 3" v-bind:class="{depth_item1:n==1,depth_item2:n==2,depth_item3:n==3}">
-        <div>
-          最近10分钟多空情况
-        </div>
-        <div class="clearfix">
-        <div class = "buy left">买入总数:{{min_amount[n-1][0]}}</div>
-        <div class = "sell left">卖出总数:{{min_amount[n-1][1]}}</div>
-        </div>
-        <div class="clearfix">
-        <div class = "buyscale left" style="background:#00ff00;"  v-bind:style="{width: min_buy_width[n-1] + '%' }"></div>
-        <div class = "sellscale left" style="background:#ff0000;" v-bind:style="{width: 100-min_buy_width[n-1] + '%' }"></div>
-        </div>
+    <div class ="title_content clearfix">
+      <div class="title left">分析</div>
+      <div class="show_btn left" v-on:click = "show = !show"> 展开/折叠</div>
+    </div>
+    <transition name="bounce">
+      <div v-if="show" class = "depth clearfix">
+        <div class="left" v-for="n in 3" v-bind:class="{depth_item1:n==1,depth_item2:n==2,depth_item3:n==3}">
+          <div>
+            最近10分钟多空情况
+          </div>
+          <div class="clearfix">
+          <div class = "buy left">买入总数:{{min_amount[n-1][0]}}</div>
+          <div class = "sell left">卖出总数:{{min_amount[n-1][1]}}</div>
+          </div>
+          <div class="clearfix">
+          <div class = "buyscale left" style="background:#00ff00;"  v-bind:style="{width: min_buy_width[n-1] + '%' }"></div>
+          <div class = "sellscale left" style="background:#ff0000;" v-bind:style="{width: 100-min_buy_width[n-1] + '%' }"></div>
+          </div>
 
-        <div>
-          最近1小时多空情况
-        </div>
-        <div class="clearfix">
-        <div class = "buy left">买入总数:{{hour_amount[n-1][0]}}</div>
-        <div class = "sell left">卖出总数:{{hour_amount[n-1][1]}}</div>
-        </div>
-        <div class="clearfix">
-        <div class = "buyscale left" style="background:#00ff00;"  v-bind:style="{width: hour_buy_width[n-1] + '%' }"></div>
-        <div class = "sellscale left" style="background:#ff0000;" v-bind:style="{width: 100-hour_buy_width[n-1] + '%' }"></div>
-        </div>
+          <div>
+            最近1小时多空情况
+          </div>
+          <div class="clearfix">
+          <div class = "buy left">买入总数:{{hour_amount[n-1][0]}}</div>
+          <div class = "sell left">卖出总数:{{hour_amount[n-1][1]}}</div>
+          </div>
+          <div class="clearfix">
+          <div class = "buyscale left" style="background:#00ff00;"  v-bind:style="{width: hour_buy_width[n-1] + '%' }"></div>
+          <div class = "sellscale left" style="background:#ff0000;" v-bind:style="{width: 100-hour_buy_width[n-1] + '%' }"></div>
+          </div>
 
-        <div>
-          最近1天多空情况
-        </div>
-        <div class="clearfix">
-        <div class = "buy left">买入总数:{{day_amount[n-1][0]}}</div>
-        <div class = "sell left">卖出总数:{{day_amount[n-1][1]}}</div>
-        </div>
-        <div class="clearfix">
-        <div class = "buyscale left" style="background:#00ff00;"  v-bind:style="{width: day_buy_width[n-1] + '%' }"></div>
-        <div class = "sellscale left" style="background:#ff0000;" v-bind:style="{width: 100-day_buy_width[n-1] + '%' }"></div>
+          <div>
+            最近1天多空情况
+          </div>
+          <div class="clearfix">
+          <div class = "buy left">买入总数:{{day_amount[n-1][0]}}</div>
+          <div class = "sell left">卖出总数:{{day_amount[n-1][1]}}</div>
+          </div>
+          <div class="clearfix">
+          <div class = "buyscale left" style="background:#00ff00;"  v-bind:style="{width: day_buy_width[n-1] + '%' }"></div>
+          <div class = "sellscale left" style="background:#ff0000;" v-bind:style="{width: 100-day_buy_width[n-1] + '%' }"></div>
+          </div>
         </div>
       </div>
-    </div>
+    </transition>
   </div>
 </template>
 <script> 
@@ -48,8 +53,7 @@ import Vue from 'vue'
 import {server_config} from '../../../../config/server_config.js'
 import axios from "axios"
 var _this = '';
-var huobi_timer = null;
-var ok_timer = null;
+var timer = [null, null, null];
 export default {
   name: 'Main',
   props:{
@@ -57,6 +61,7 @@ export default {
   },
   data () {
     return {
+      show:false,
       min_amount:[[0,0],[0,0],[0,0]],
       min_buy_width:[100,100,100],
       hour_amount:[[0,0],[0,0],[0,0]],
@@ -76,8 +81,9 @@ export default {
           withCredentials:false,
         })
         .then( (response) => {
-          huobi_timer = setInterval(function(){get_huobi(response.data);},1000);
-          ok_timer = setInterval(function(){get_ok(response.data);},1000);
+          for(let i = 0; i < 3; i++){
+            timer[i] = setInterval(function(){get_analyse(i,response.data);},10000);
+          }
         })
         .catch( (error) => {
 
@@ -85,13 +91,68 @@ export default {
         
     }
   },destroyed: function(){
-    clearInterval(huobi_timer);
-    clearInterval(ok_timer);
+    for(var i = 0; i < 3; i++){
+      clearInterval(timer[i]);
+    }
   },methods:{
     
   }
 }
+function get_analyse(market_id, order_coin){
+    console.log(market_id+ order_coin);
+    var url = server_config.url+"/back/gettradeinfo.php?market="+market_id+"&order_coin="+order_coin+"&base_coin=USDT&second=600";
+    axios.get(
+      url,
+      {
+      method:'get',
+      withCredentials:false,
+    })
+    .then( (response) => {
+      console.log(response.data);
+      var json_obj = response.data;
+      _this.$set(_this.min_amount[market_id],0,json_obj["buy_count"].slice(0,10));
+      _this.$set(_this.min_amount[market_id],1,json_obj["sell_count"].slice(0,10));
+      _this.$set(_this.min_buy_width, market_id, parseFloat(json_obj["buy_count"])/(parseFloat(json_obj["buy_count"])+parseFloat(json_obj["sell_count"]))*100);
+    })
+    .catch( (error) => {
 
+    });
+    
+    url = server_config.url+"/back/gettradeinfo.php?market="+market_id+"&order_coin="+order_coin+"&base_coin=USDT&second=3600";
+    axios.get(
+      url,
+      {
+      method:'get',
+      withCredentials:false,
+    })
+    .then( (response) => {
+      var json_obj = response.data;
+      _this.$set(_this.hour_amount[market_id],0,json_obj["buy_count"].slice(0,10));
+      _this.$set(_this.hour_amount[market_id],1,json_obj["sell_count"].slice(0,10));
+      _this.$set(_this.hour_buy_width, market_id, parseFloat(json_obj["buy_count"])/(parseFloat(json_obj["buy_count"])+parseFloat(json_obj["sell_count"]))*100);
+    })
+    .catch( (error) => {
+
+    });
+    url = server_config.url+"/back/gettradeinfo.php?market="+market_id+"&order_coin="+order_coin+"&base_coin=USDT&second=86400";
+    axios.get(
+      url,
+      {
+      method:'get',
+      withCredentials:false,
+    })
+    .then( (response) => {
+      var json_obj = response.data;
+      _this.$set(_this.day_amount[market_id],0,json_obj["buy_count"].slice(0,10));
+      _this.$set(_this.day_amount[market_id],1,json_obj["sell_count"].slice(0,10));
+      _this.$set(_this.day_buy_width, market_id, parseFloat(json_obj["buy_count"])/(parseFloat(json_obj["buy_count"])+parseFloat(json_obj["sell_count"]))*100);
+    })
+    .catch( (error) => {
+
+    });
+    
+}
+/*
 function get_huobi(order_coin){
     var url = server_config.url+"/back/gettradeinfo.php?market=0&order_coin="+order_coin+"&base_coin=USDT&second=600";
     axios.get(
@@ -188,7 +249,7 @@ function get_ok(order_coin){
     })
     .catch( (error) => {
     });
-}
+}*/
 
 
 </script>
@@ -196,10 +257,39 @@ function get_ok(order_coin){
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss" scoped>
 @import "../../../../style/index.scss";
+.title_content{
+  width:$content_width;
+  margin: 36px auto 0 auto;
+}
 .title {
   font-size:36px;
-  margin-top:36px;
   color:$green;
+}
+.bounce-enter-active {
+  animation: bounce-in .3s;
+}
+.bounce-leave-active {
+  animation: bounce-in .3s reverse;
+}
+@keyframes bounce-in {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.5);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.show_btn{
+  background:rgb(255,106,25);
+  font-size:18px;
+  color:rgb(255,255,255);
+  padding:4px 4px;
+  border-radius:4px;
+  margin-top:8px;
+  margin-left:48px;
 }
 .depth{
   width:$content_width;

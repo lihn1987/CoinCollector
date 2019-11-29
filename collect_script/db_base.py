@@ -142,7 +142,6 @@ def insert_article(article_item):
             article_item.source_media.replace("'","""\'"""),
             article_item.source_addr.replace("'","""\'"""),
             article_item.content.replace("'","""\'"""))
-        print("add artical:"+article_item.source_media+":"+article_item.title)
         threadLock.acquire()
         db_cur.execute(sql)
         mydb.commit()
@@ -247,14 +246,11 @@ def insert_into_trade_detail(key, trade_list):
     try:
         threadLock.acquire()
         for trade in trade_list:
-            print("------------------------")
             sql = "insert into trade_detail values(DEFAULT, %d, %d, '%s', '%s', %f,%d, %f)"\
                 %(trade['trade_time'], key[0], key[1], key[2], trade['amount'], trade['dir'], trade['price'])
-            print(sql)
             db_cur.execute(sql)
         mydb.commit()
         threadLock.release()
-        print("insert ok~")
         return True
     except:
         threadLock.release()
