@@ -17,6 +17,7 @@ def init_db(ip="localhost", user="root", pw="", db_name="coin"):
     init_news_base()
     init_article2coinbase()
     init_market_base_common()
+    init_trade_detail()
 
 def init_coin_base():
     print("init db")
@@ -56,8 +57,8 @@ def init_news_base():
     print("init db")
     try:
         db_cur.execute("""CREATE TABLE `coin`.`article` (
-            `id` int(11) NOT NULL AUTO_INCREMENT,
-            `time_utc` INT NOT NULL,
+            `id` BIGINT NOT NULL AUTO_INCREMENT,
+            `time_utc` BIGINT NOT NULL,
             `title` VARCHAR(45) NOT NULL,
             `desc` TEXT NULL,
             `author` VARCHAR(45) NULL,
@@ -88,6 +89,26 @@ def init_market_base_common():
             PRIMARY KEY (`market`, `coin_name`, `base_coin_name`),
             INDEX `id`(`id`)
             );""")
+        print("db_init ok")
+    except:
+        print("base table already exist")
+
+def init_trade_detail():
+    try:
+        db_cur.execute("""CREATE TABLE `coin`.`trade_detail`  (
+            `id` BIGINT(0) NOT NULL AUTO_INCREMENT,
+            `trade_time` BIGINT(0) NOT NULL,
+            `market` int(10) NULL,
+            `order_coin` varchar(255) NULL,
+            `base_coin` varchar(255) NULL,
+            `amount` decimal(20, 10) NULL,
+            `dir` int(255) NULL,
+            `price` decimal(20, 10) NULL,
+            PRIMARY KEY (`id`),
+            INDEX `a`(`trade_time`, `market`, `order_coin`, `base_coin`, `amount`, `dir`, `price`)
+            );
+
+        ;""")
         print("db_init ok")
     except:
         print("base table already exist")
@@ -212,8 +233,33 @@ def insert_market_base_common(coin_name ,
         except:
             print("交易对更新失败")
             return False
-    
-
+    '''
+    `id` int(0) NOT NULL AUTO_INCREMENT,
+            `trade_time` int(0) NOT NULL,
+            `market` int(10) NULL,
+            `order_coin` varchar(255) NULL,
+            `base_coin` varchar(255) NULL,
+            `amount` decimal(20, 10) NULL,
+            `dir` int(255) NULL,
+            `price` decimal(20, 10) NULL,
+            '''
+def insert_into_trade_detail(key, trade_list):
+    try:
+        threadLock.acquire()
+        for trade in trade_list:
+            print("------------------------")
+            sql = "insert into trade_detail values(DEFAULT, %d, %d, '%s', '%s', %f,%d, %f)"\
+                %(trade['trade_time'], key[0], key[1], key[2], trade['amount'], trade['dir'], trade['price'])
+            print(sql)
+            db_cur.execute(sql)
+        mydb.commit()
+        threadLock.release()
+        print("insert ok~")
+        return True
+    except:
+        threadLock.release()
+        print("insert error!")
+        return False
 
 
 

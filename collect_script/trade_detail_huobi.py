@@ -7,17 +7,17 @@ import gzip
 import websocket
 import redis
 import pickle
-from depth_info import DepthInfo
+from trade_detail_info import TradeDetailInfo
 
 class myThread (threading.Thread):
-    def __init__(self, coin_list):
+    def __init__(self, coin_list, detail_callback):
         threading.Thread.__init__(self)
         self.coin_list = coin_list
         self.coin_dict = {}
         self.ws = websocket.WebSocket()
         self.timer = None
         self.redis_db = redis.Redis(host='localhost', port=6379)
-
+        self.callback = detail_callback
     def connect(self):
         self.ws.connect("wss://api.huobi.pro/ws", http_proxy_host="127.0.0.1", http_proxy_port=50617)
     def on_recv(self, str):
@@ -29,15 +29,17 @@ class myThread (threading.Thread):
             send_data = {'pong':json_data['ping']}
             self.send_data(send_data)
         elif 'ch' in json_data:
-            deep_info = DepthInfo()
-            deep_info.up_time = json_data['ts']
-            deep_info.order_coin = self.coin_dict[json_data['ch'].split(".")[1].upper()][0]
-            deep_info.base_coin = self.coin_dict[json_data['ch'].split(".")[1].upper()][1]
-            deep_info.forbuy = json_data['tick']['bids']
-            deep_info.forsell = json_data['tick']['asks']
-            deep_info.market = 0
-            key = "0_"+self.coin_dict[json_data['ch'].split(".")[1].upper()][0]+"_"+self.coin_dict[json_data['ch'].split(".")[1].upper()][1]
-            self.redis_db.set(key, pickle.dumps(deep_info))
+            info_list = []
+            key = (0, self.coin_dict[json_data['ch'].split(".")[1].upper()][0], self.coin_dict[json_data['ch'].split(".")[1].upper()][1])
+            for item in json_data["tick"]["data"]:
+                info = {}
+                info["amount"] = item['amount']
+                info["price"] = item['price']
+                info["dir"] = 0 if item['direction'] == 'buy' else 1
+                info["trade_time"] = item['ts']
+                info_list.append(info)
+            self.callback(key, info_list)
+
     def shutdown(self):
         print("shutdown")
         self.ws.shutdown()
@@ -51,7 +53,7 @@ class myThread (threading.Thread):
             symbel = item[0].upper()+item[1].upper()
             self.coin_dict[symbel] = (item[0].upper(), item[1].upper())
             self.send_data({
-            "sub": "market.%s.depth.step0"%symbel.lower(),
+            "sub": "market.%s.trade.detail"%symbel.lower(),
             "id": "asefddfeasdfefgh"
             })
     #重置超时时间
@@ -82,11 +84,8 @@ class myThread (threading.Thread):
 coin_list=[("BTC", "USDT"),("ETH", "USDT"),("XRP", "USDT"),("BCH", "USDT"),("LTC", "USDT"),("EOS", "USDT"),("BSV", "USDT"),("XLM", "USDT"),("TRX", "USDT"),("ADA", "USDT"),
                  ("BTC", "USDT"),("ETH", "USDT"),("XRP", "USDT"),("BCH", "USDT"),("LTC", "USDT"),("EOS", "USDT"),("BSV", "USDT"),("XLM", "USDT"),("TRX", "USDT"),("ADA", "USDT")]
 
-def StartCrwal():
-    thread_ = myThread(coin_list)
+def run(detail_callback):
+    thread_ = myThread(coin_list, detail_callback)
     thread_.start()
-'''
-StartCrwal()
-while True:
-    time.sleep(1)
-'''
+
+

@@ -9,8 +9,27 @@ import redis
 import pickle
 import zlib
 import numpy
-from depth_info import DepthInfo
+import datetime,pytz 
+def iso2timestamp(datestring, format='%Y-%m-%dT%H:%M:%S.%fZ',timespec='seconds'):
+    """
+    ISO8601时间转换为时间戳
 
+    :param datestring:iso时间字符串 2019-03-25T16:00:00.000Z，2019-03-25T16:00:00.000111Z
+    :param format:%Y-%m-%dT%H:%M:%S.%fZ；其中%f 表示毫秒或者微秒
+    :param timespec:返回时间戳最小单位 seconds 秒，milliseconds 毫秒,microseconds 微秒
+    :return:时间戳 默认单位秒
+    """
+    tz = pytz.timezone('Asia/Shanghai')
+    utc_time = datetime.datetime.strptime(datestring, format)  # 将字符串读取为 时间 class datetime.datetime
+
+    time = utc_time.replace(tzinfo=pytz.utc).astimezone(tz)
+
+    times = {
+        'seconds': int(time.timestamp()),
+        'milliseconds': round(time.timestamp() * 1000),
+        'microseconds': round(time.timestamp() * 1000 * 1000),
+    }
+    return times[timespec]
 
 def OnChange(depth_info, change_info):
     #修改卖盘
@@ -83,37 +102,33 @@ def OnChange(depth_info, change_info):
 
     
 class myThread (threading.Thread):
-    def __init__(self, coin_list):
+    def __init__(self, coin_list,callback):
         threading.Thread.__init__(self)
         self.coin_list = coin_list
         self.coin_dict = {}
         self.ws = websocket.WebSocket()
         self.timer = None
         self.redis_db = redis.Redis(host='localhost', port=6379)
-        self.info = {}
-        for coin in coin_list:
-            self.info[coin] = DepthInfo()
-
+        self.callback = callback
     def connect(self):
         self.ws.connect("wss://real.okex.com:8443/ws/v3", http_proxy_host="127.0.0.1", http_proxy_port=50617)
     def on_recv(self, str):
         self.reset_timer()
         json_data = json.loads(str)
-        if 'event' not in json_data and json_data['action'] == 'partial':
-            info = self.info[(json_data['data'][0]['instrument_id'].split("-")[0],json_data['data'][0]['instrument_id'].split("-")[1])]
-            info.order_coin = json_data['data'][0]['instrument_id'].split("-")[0]
-            info.base_coin = json_data['data'][0]['instrument_id'].split("-")[1]
-            info.forbuy = numpy.array(json_data['data'][0]['bids'])[:,0:2].tolist()
-            info.forsell = numpy.array(json_data['data'][0]['asks'])[:,0:2].tolist()
-            info.up_time = json_data['data'][0]['timestamp']*1000
-            info.market = 1
-            key = "1_"+json_data['data'][0]['instrument_id'].split("-")[0]+"_"+json_data['data'][0]['instrument_id'].split("-")[1]
-            self.redis_db.set(key, pickle.dumps(info))
-        elif 'event' not in json_data and json_data['action'] == 'update':
-            info = self.info[(json_data['data'][0]['instrument_id'].split("-")[0],json_data['data'][0]['instrument_id'].split("-")[1])]
-            OnChange(info, json_data)
-            key = "1_"+json_data['data'][0]['instrument_id'].split("-")[0]+"_"+json_data['data'][0]['instrument_id'].split("-")[1]
-            self.redis_db.set(key, pickle.dumps(info))
+        for_callback = {}
+        if 'table' in json_data and json_data['table'] == "spot/trade":
+            for trade_item in json_data['data']:
+                key = (1, trade_item['instrument_id'].split("-")[0], trade_item['instrument_id'].split("-")[1])
+                info = {} 
+                info["dir"] = 0 if trade_item["side"] == "buy" else 1
+                info["price"] = float(trade_item["price"])
+                info["amount"] = float(trade_item["size"])
+                info["trade_time"] = iso2timestamp(trade_item["timestamp"])*1000
+                if key not in for_callback:
+                    for_callback[key] = []
+                for_callback[key].append(info)
+        for key in for_callback:
+            self.callback(key, for_callback[key])
 
     def shutdown(self):
         print("shutdown")
@@ -123,11 +138,11 @@ class myThread (threading.Thread):
         str = json.dumps(obj)
         print('send:'+str)
         self.ws.send(str.encode())
-    def sub_depth(self):
+    def sub_detail(self):
         for item in self.coin_list:
             symbel = item[0].upper()+item[1].upper()
             self.coin_dict[symbel] = (item[0].upper(), item[1].upper())
-            self.send_data({"op": "subscribe", "args": ["spot/depth:%s-%s"%(item[0].upper(),item[1].upper())]})
+            self.send_data({"op": "subscribe", "args": ["spot/trade:%s-%s"%(item[0].upper(),item[1].upper())]})
     #重置超时时间
     def reset_timer(self):
         if self.timer and self.timer.isAlive():
@@ -142,7 +157,7 @@ class myThread (threading.Thread):
                 if self.ws.connected:
                     self.reset_timer()
                 #设置要监听的币种
-                self.sub_depth()
+                self.sub_detail()
                 while True:
                     recv_data = self.ws.recv()
                     if recv_data == '':
@@ -159,12 +174,7 @@ class myThread (threading.Thread):
                 pass
 coin_list=[("BTC", "USDT"),("ETH", "USDT"),("XRP", "USDT"),("BCH", "USDT"),("LTC", "USDT"),("EOS", "USDT"),("BSV", "USDT"),("XLM", "USDT"),("TRX", "USDT"),("ADA", "USDT"),
                  ("BTC", "USDT"),("ETH", "USDT"),("XRP", "USDT"),("BCH", "USDT"),("LTC", "USDT"),("EOS", "USDT"),("BSV", "USDT"),("XLM", "USDT"),("TRX", "USDT"),("ADA", "USDT")]
-def StartCrwal():
-    thread_ = myThread(coin_list)
+def run(detail_callback):
+    thread_ = myThread(coin_list, detail_callback)
     thread_.start()
-'''
-StartCrwal()
-while True:
-    time.sleep(1)
-'''
 

@@ -109,6 +109,29 @@ class CoinBase{
             echo json_encode($rtn,JSON_UNESCAPED_UNICODE);
         }
     }
+    function getScaleTradeDetail($market, $order_coin, $base_coin, $second){
+        $rtn=[];
+        $time = time()*1000-$second*1000;
+        $sql = "select sum(amount) as amount from trade_detail
+        where `trade_time` > $time and
+        market=$market and
+        order_coin = '$order_coin' and
+        base_coin = '$base_coin' and 
+        dir = 0;";
+        $result = $this->db_conn->query($sql);
+        $row = $result->fetch_assoc();
+        $rtn['buy_count'] = $row["amount"];
+        $sql = "select sum(amount) as amount from trade_detail
+        where `trade_time` > $time and
+        market=$market and
+        order_coin = '$order_coin' and
+        base_coin = '$base_coin' and 
+        dir = 1;";
+        $result = $this->db_conn->query($sql);
+        $row = $result->fetch_assoc();
+        $rtn['sell_count'] = $row["amount"];
+        echo json_encode($rtn,JSON_UNESCAPED_UNICODE);
+    }
     
 };
 ?>

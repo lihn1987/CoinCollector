@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="title">深度行情</div>
+    <div class="title">成交记录</div>
     <div class = "depth clearfix">
       <div class="left" v-for="n in 3" v-bind:class="{depth_item1:n==1,depth_item2:n==2,depth_item3:n==3}">
         <div>
@@ -8,22 +8,14 @@
         </div>
         <table class="table_sell">
           <tr>
-            <th class="depth_head1">价格(USDT)</th>
-            <th class="depth_head2">数量</th>
+            <th class="depth_head1">交易时间</th>
+            <th class="depth_head2">价格(USDT)</th>
+            <th class="depth_head3">数量</th>
           </tr>
-          <tr v-for="i in 5" >
-            <td >{{depth_data[n-1][0][i-1][0].toString().substring(0,10)}}</td>
-            <td >{{depth_data[n-1][0][i-1][1].toString().substring(0,10)}}</td>
-          </tr>
-        </table>
-        <table class = "table_buy">
-          <tr>
-            <th class="depth_head1">价格(USDT)</th>
-            <th class="depth_head2">数量</th>
-          </tr>
-          <tr v-for="i in 5" >
-            <td >{{depth_data[n-1][1][i-1][0].toString().substring(0,10)}}</td>
-            <td >{{depth_data[n-1][1][i-1][1].toString().substring(0,10)}}</td>
+          <tr v-for="i in 10" v-bind:class="{green:depth_data[n-1][i-1][3]==0}">
+            <td >{{utc2beijing(depth_data[n-1][i-1][0]).toString()}}</td>
+            <td >{{(depth_data[n-1][i-1][1]).toString().substring(0,10)}}</td>
+            <td >{{(depth_data[n-1][i-1][2]).toString().substring(0,10)}}</td>
           </tr>
         </table>
       </div>
@@ -43,14 +35,21 @@ export default {
   },
   data () {
     return {
-      depth_item_title:["火币行情", "OK行情", "币安行情"],
-      depth_data:[[[['-','-'],['-','-'],['-','-'],['-','-'],['-','-']],[['-','-'],['-','-'],['-','-'],['-','-'],['-','-']]],
-        [[['-','-'],['-','-'],['-','-'],['-','-'],['-','-']],[['-','-'],['-','-'],['-','-'],['-','-'],['-','-']]],
-        [[['-','-'],['-','-'],['-','-'],['-','-'],['-','-']],[['-','-'],['-','-'],['-','-'],['-','-'],['-','-']]]]
+      depth_item_title:["火币最新交易", "OK最新交易", "币安最新交易"],
+      depth_data:[]
     }
   },
   created: function(){
     _this = this
+    var detail_count = 10;
+    var _depth_data = new Array()
+    for(var market_idx = 0; market_idx < 3; market_idx++){
+      _depth_data[market_idx] = new Array()
+      for(var detail_idx = 0; detail_idx < detail_count; detail_idx++){
+        _depth_data[market_idx][detail_idx] = new Array('-','-','-',0);
+      }
+    }
+    this.depth_data = _depth_data;
     if(window.WebSocket){
         var url = server_config.url+"/back/getcoinbase.php?method=get_coin_name_en&id="+this.$props.id;
         axios.get(
@@ -71,7 +70,12 @@ export default {
   },destroyed: function(){
     discnnect_websocket();
   },methods:{
-    
+    utc2beijing(utc_datetime) {
+      if(utc_datetime == '-')return'-';
+      //return utc_datetime;
+      var d = new Date(parseInt(utc_datetime));
+      return (d.getHours().toString().length == 1?"0":"")+d.getHours().toString()+":"+(d.getMinutes().toString().length == 1?"0":"")+d.getMinutes().toString()+":"+(d.getSeconds().toString().length == 1?"0":"")+d.getSeconds().toString();
+  }
   }
 }
 
@@ -107,11 +111,9 @@ function connect_websocket(coin){
         "depth": 5
       }
     }]
-    ws = new WebSocket('ws://localhost:8000');
+    ws = new WebSocket('ws://localhost:8001');
     ws.onopen = function(e){
         console.log("连接服务器成功");
-        //_this.depth_item_title=['a1','b1','c1'];
-        
         for(var item in sub_obj){
           //ws.send(JSON.stringify(item));
           console.log(JSON.stringify(sub_obj[item]))
@@ -127,17 +129,22 @@ function connect_websocket(coin){
         //reconnect_websocket();
     }
     ws.onmessage = function(e){
-        //mess.innerHTML = "连接成功";
-        //console.log(e.data);
         var json_obj = JSON.parse(e.data)
         if(json_obj.order_coin == coin_order && json_obj.market == 0){
-          _this.$set(_this.depth_data[0],0,json_obj.forsell.slice(0,5).reverse());
-          _this.$set(_this.depth_data[0],1,json_obj.forbuy.slice(0,5));
-          //console.log(json_obj.forsell.slice(json_obj.forsell.length-5,json_obj.forsell.length))
+          var tmp_array = [];
+          for(var item in json_obj.data){
+            tmp_array.push([json_obj.data[item].trade_time, json_obj.data[item].price, json_obj.data[item].amount, json_obj.data[item].dir]);
+          }
+          tmp_array = tmp_array.concat(_this.depth_data[0]);
+          _this.$set(_this.depth_data,0,tmp_array.slice(0,10));
         }else if(json_obj.order_coin == coin_order && json_obj.market == 1){
-          _this.$set(_this.depth_data[1],0,json_obj.forsell.slice(0,5).reverse());
-          _this.$set(_this.depth_data[1],1,json_obj.forbuy.slice(0,5));
-          //console.log(json_obj.forsell.slice(json_obj.forsell.length-5,json_obj.forsell.length))
+          var tmp_array = [];
+          for(var item in json_obj.data){
+            tmp_array.push([json_obj.data[item].trade_time, json_obj.data[item].price, json_obj.data[item].amount, json_obj.data[item].dir]);
+          }
+          tmp_array = tmp_array.reverse();
+          tmp_array = tmp_array.concat(_this.depth_data[1]);
+          _this.$set(_this.depth_data,1,tmp_array.slice(0,10));
         }
     }
 }
@@ -158,6 +165,8 @@ function discnnect_websocket(){
     ws.close();
   }
 }
+
+
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
@@ -225,12 +234,21 @@ tr:nth-child(even) {
 	background-color:#fff;
 }
 .depth_head{
-  width:50%;
+  width:33.3333%;
 }
 .depth_head1{
   @extend .depth_head ;
 }
 .depth_head2{
   @extend .depth_head ;
+}
+.depth_head3{
+  @extend .depth_head ;
+}
+.green {
+  color:rgb(86,236,86);
+}
+.red {
+  color:rgb(236,86,86);
 }
 </style>

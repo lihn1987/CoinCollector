@@ -3,7 +3,7 @@
     <div class="content clearfix">
       <a href="/#/" class="logo left">{{main_name}}</a>
       <a href="/#/news" class="item right" :class="{ item_active: current==4 }">{{new_name}}</a>
-      <a href="/#/stone" class="item right" :class="{ item_active: current==3 }">{{stone_name}}</a>
+      <!-- <a href="/#/stone" class="item right" :class="{ item_active: current==3 }">{{stone_name}}</a> -->
       <a href="/#/coin" class="item right" :class="{ item_active: current==2 }">{{coin_name}}</a>
       <a href="/#/" class="item right" :class="{ item_active: current==1 }">{{page_home}}</a>
     </div>
