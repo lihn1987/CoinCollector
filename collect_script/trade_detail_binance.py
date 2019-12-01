@@ -121,7 +121,7 @@ class myThread (threading.Thread):
         self.reset_timer()
         json_data = json.loads(str)
         info = {}
-        print(json_data)
+        #print(json_data)
         info["dir"] = 0 if json_data['m']==True else 1
         info["price"] = float(json_data['p'])
         info["amount"] = float(json_data['q'])
