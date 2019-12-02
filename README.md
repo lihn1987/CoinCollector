@@ -10,27 +10,22 @@
 - 能够分析每篇文章和哪个币种相关
 - 能够抓取火币，币安，ok的币种消息
 ## 前置环境
+
+### linux需要的基本工具
+```
+sudo apt-get install git python3 python3-pip redis-server
+```
 ### 安装mysql
 ```
 mysql请自行安装，这里使用的是xampp一套带的
 ```
 
-### Python数据库连接工具的安装
+### Python需要的基础工具
 
 ```
-pip3 install mysql-connector
+pip3 install mysql-connector PyQuery websocket-client  redis  jieba pytz
 ```
 
-### Python页面分析工具的安装
-
-```
-pip3 install PyQuery
-```
-
-### 此法分析工具的安装
-```
-pip3 install jieba
-```
 
 ### 需要支持https
 linux ubuntu 操作

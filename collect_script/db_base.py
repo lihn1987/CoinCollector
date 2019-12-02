@@ -13,12 +13,18 @@ def init_db(ip="localhost", user="root", pw="", db_name="coin"):
         database=db_name
     )
     db_cur = mydb.cursor()
+    init_base()
     init_coin_base()
     init_news_base()
     init_article2coinbase()
     init_market_base_common()
     init_trade_detail()
-
+def init_base():
+    try:
+        db_cur.execute("CREATE DATABASE coin;")
+        print("db_init ok")
+    except:
+        print("db already exist")
 def init_coin_base():
     print("init db")
     try:
