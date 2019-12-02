@@ -10,6 +10,7 @@ import pickle
 import zlib
 import numpy
 import datetime,pytz 
+from config import config
 def iso2timestamp(datestring, format='%Y-%m-%dT%H:%M:%S.%fZ',timespec='seconds'):
     """
     ISO8601时间转换为时间戳
@@ -111,7 +112,10 @@ class myThread (threading.Thread):
         self.redis_db = redis.Redis(host='localhost', port=6379)
         self.callback = callback
     def connect(self):
-        self.ws.connect("wss://real.okex.com:8443/ws/v3", http_proxy_host="127.0.0.1", http_proxy_port=1087)
+        if config["proxy_config"]["proxy_use"]:
+            self.ws.connect("wss://real.okex.com:8443/ws/v3", http_proxy_host=config["proxy_config"]["proxy_ip"], http_proxy_port=config["proxy_config"]["proxy_port"])
+        else:
+            self.ws.connect("wss://real.okex.com:8443/ws/v3")
     def on_recv(self, str):
         self.reset_timer()
         json_data = json.loads(str)

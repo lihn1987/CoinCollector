@@ -40,17 +40,12 @@ def detail_callback(key, info_list):
         trade_detail[key] = []
     detail_lock.release()
     #处理分钟，小时天的统计
-    detail_anlyse(key, info_list)
-def detail_anlyse(key, info_list):
-    '''
-    info["dir"] = 0 if json_data['m']==True else 1
-        info["price"] = float(json_data['p'])
-        info["amount"] = float(json_data['q'])
-        info["trade_time"] = json_data['T']
-        key = (2, self.coin_dict[json_data['s']][0], self.coin_dict[json_data['s']][1])
-    '''
-    min_detail_anlyse(key, info_list)
-def min_detail_anlyse(key, info_list):
+    detail_analyse(key, info_list)
+def detail_analyse(key, info_list):
+    min_detail_analyse(key, info_list)
+    hour_line_analyse(key, info_list)
+    day_line_analyse(key, info_list)
+def min_detail_analyse(key, info_list):
     #进行归类
     time_key = {}
     for info_item in info_list:
@@ -89,11 +84,85 @@ def min_detail_anlyse(key, info_list):
     if len(data_db) > 60:
         del data_db[60:]
     redis_db.set(key, json.dumps(data_db))
-    pass
-def hour_line_anlyse(key, info_list):
-    pass
-def day_line_anlyse(key, info_list):
-    pass
+
+def hour_line_analyse(key, info_list):
+    #进行归类
+    time_key = {}
+    for info_item in info_list:
+        print(type(info_item["trade_time"]))
+        time_key_item = int(info_item["trade_time"]/1000/60/60)*1000*60*60
+        if time_key_item not in time_key:
+            time_key[time_key_item] = {}
+            time_key[time_key_item]["buy"] = 0.0
+            time_key[time_key_item]["sell"] = 0.0
+        if info_item["dir"] == 0:
+            time_key[time_key_item]["buy"]+= float(info_item["amount"])
+        else:
+            time_key[time_key_item]["sell"]+= float(info_item["amount"])
+    #准备写入数据库
+    key = "trade_detail_hour_"+str(key[0])+"_"+key[1]+"_"+key[2]
+    #读
+    data_db = redis_db.get(key)
+    if data_db is None:
+        data_db = []
+    else:
+        data_db = json.loads(data_db)
+    for time_key_item in time_key:
+        if len(data_db)==0:
+            data_db.append({"time":time_key_item, "buy":time_key[time_key_item]["buy"], "sell":time_key[time_key_item]["sell"]})
+            break
+        for i in range(len(data_db)):
+            if time_key_item > data_db[i]["time"]:
+                data_db.insert(i, {"time":time_key_item, "buy":time_key[time_key_item]["buy"], "sell":time_key[time_key_item]["sell"]})
+                break
+            elif time_key_item == data_db[i]["time"]:
+                data_db[i]["buy"] += time_key[time_key_item]["buy"]
+                data_db[i]["sell"] += time_key[time_key_item]["sell"]
+                break
+    #删除多余数据
+    print(key)
+    if len(data_db) > 60:
+        del data_db[60:]
+    redis_db.set(key, json.dumps(data_db))
+def day_line_analyse(key, info_list):
+    #进行归类
+    time_key = {}
+    for info_item in info_list:
+        print(type(info_item["trade_time"]))
+        time_key_item = int(info_item["trade_time"]/1000/60/60/24)*1000*60*60*24
+        if time_key_item not in time_key:
+            time_key[time_key_item] = {}
+            time_key[time_key_item]["buy"] = 0.0
+            time_key[time_key_item]["sell"] = 0.0
+        if info_item["dir"] == 0:
+            time_key[time_key_item]["buy"]+= float(info_item["amount"])
+        else:
+            time_key[time_key_item]["sell"]+= float(info_item["amount"])
+    #准备写入数据库
+    key = "trade_detail_day_"+str(key[0])+"_"+key[1]+"_"+key[2]
+    #读
+    data_db = redis_db.get(key)
+    if data_db is None:
+        data_db = []
+    else:
+        data_db = json.loads(data_db)
+    for time_key_item in time_key:
+        if len(data_db)==0:
+            data_db.append({"time":time_key_item, "buy":time_key[time_key_item]["buy"], "sell":time_key[time_key_item]["sell"]})
+            break
+        for i in range(len(data_db)):
+            if time_key_item > data_db[i]["time"]:
+                data_db.insert(i, {"time":time_key_item, "buy":time_key[time_key_item]["buy"], "sell":time_key[time_key_item]["sell"]})
+                break
+            elif time_key_item == data_db[i]["time"]:
+                data_db[i]["buy"] += time_key[time_key_item]["buy"]
+                data_db[i]["sell"] += time_key[time_key_item]["sell"]
+                break
+    #删除多余数据
+    print(key)
+    if len(data_db) > 60:
+        del data_db[60:]
+    redis_db.set(key, json.dumps(data_db))
 trade_detail_huobi.run(detail_callback)
 trade_detail_ok.run(detail_callback)
 trade_detail_binance.run(detail_callback)

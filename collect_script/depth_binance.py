@@ -10,6 +10,7 @@ import pickle
 import zlib
 import numpy
 from depth_info import DepthInfo
+from config import config
 
     
 class myThread (threading.Thread):
@@ -26,7 +27,10 @@ class myThread (threading.Thread):
         print("开始连接")
         tmp_str = ''
         tmp_str+="/%s%s@depth20@100ms"%(self.coin_pair[0].lower(), self.coin_pair[1].lower())
-        self.ws.connect("wss://stream.binance.com:9443/ws"+tmp_str, http_proxy_host="127.0.0.1", http_proxy_port=1087)
+        if config["proxy_config"]["proxy_use"]:
+            self.ws.connect("wss://stream.binance.com:9443/ws"+tmp_str, http_proxy_host=config["proxy_config"]["proxy_ip"], http_proxy_port=config["proxy_config"]["proxy_port"])
+        else:
+            self.ws.connect("wss://stream.binance.com:9443/ws"+tmp_str)
         print("连接完成")
     def on_recv(self, str):
         self.reset_timer()
@@ -93,6 +97,7 @@ StartCrwal()
 while True:
     time.sleep(1)
 '''
+
 
 
 

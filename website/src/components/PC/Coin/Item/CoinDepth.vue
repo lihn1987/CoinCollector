@@ -38,7 +38,7 @@
 <script> 
 import Vue from 'vue'
 
-import {server_config} from '../../../../config/server_config.js'
+import {server_config, websocket_config} from '../../../../config/server_config.js'
 import axios from "axios"
 var _this = '';
 export default {
@@ -113,7 +113,7 @@ function connect_websocket(coin){
         "depth": 5
       }
     }]
-    ws = new WebSocket('ws://localhost:8000');
+    ws = new WebSocket(websocket_config.depth_url);
     ws.onopen = function(e){
         console.log("连接服务器成功");
         //_this.depth_item_title=['a1','b1','c1'];

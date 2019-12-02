@@ -10,6 +10,7 @@ import pickle
 import zlib
 import numpy
 import datetime,pytz 
+from config import config
 def iso2timestamp(datestring, format='%Y-%m-%dT%H:%M:%S.%fZ',timespec='seconds'):
     """
     ISO8601时间转换为时间戳
@@ -116,7 +117,11 @@ class myThread (threading.Thread):
         tmp_str = ''
         for coin_item in coin_list:
             tmp_str+="/%s%s@trade"%(coin_item[0].lower(), coin_item[1].lower())
-        self.ws.connect("wss://stream.binance.com:9443/ws"+tmp_str, http_proxy_host="127.0.0.1", http_proxy_port=1087)
+
+        if config["proxy_config"]["proxy_use"]:
+            self.ws.connect("wss://stream.binance.com:9443/ws"+tmp_str, http_proxy_host=config["proxy_config"]["proxy_ip"], http_proxy_port=config["proxy_config"]["proxy_port"])
+        else:
+            self.ws.connect("wss://stream.binance.com:9443/ws"+tmp_str)
     def on_recv(self, str):
         self.reset_timer()
         json_data = json.loads(str)

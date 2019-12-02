@@ -1,8 +1,14 @@
 var server_config = {
-    url: 'http://a.com',
     //url: '',
+    url: 'http://a.com',
     port: '80'
 }
+var websocket_config = {
+  depth_url:"ws://localhost:8000",
+  detail_url:"ws://localhost:8001",
+  analyse_url:"ws://localhost:8002",
+}
 export {
-  server_config
+  server_config,
+  websocket_config
 }

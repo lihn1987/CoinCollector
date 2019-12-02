@@ -8,7 +8,7 @@ import websocket
 import redis
 import pickle
 from trade_detail_info import TradeDetailInfo
-
+from config import config
 class myThread (threading.Thread):
     def __init__(self, coin_list, detail_callback):
         threading.Thread.__init__(self)
@@ -19,7 +19,10 @@ class myThread (threading.Thread):
         self.redis_db = redis.Redis(host='localhost', port=6379)
         self.callback = detail_callback
     def connect(self):
-        self.ws.connect("wss://api.huobi.pro/ws", http_proxy_host="127.0.0.1", http_proxy_port=1087)
+        if config["proxy_config"]["proxy_use"]:
+            self.ws.connect("wss://api.huobi.pro/ws", http_proxy_host=config["proxy_config"]["proxy_ip"], http_proxy_port=config["proxy_config"]["proxy_port"])
+        else:
+            self.ws.connect("wss://api.huobi.pro/ws")
     def on_recv(self, str):
         self.reset_timer()
         json_data = json.loads(str)
