@@ -13,7 +13,7 @@
 
 ### linux需要的基本工具
 ```
-sudo apt-get install git python3 python3-pip redis-server
+sudo apt-get install git python3 python3-pip redis-server 
 ```
 ### 安装mysql
 ```
@@ -23,7 +23,7 @@ mysql请自行安装，这里使用的是xampp一套带的
 ### Python需要的基础工具
 
 ```
-pip3 install mysql-connector PyQuery websocket-client  redis  jieba pytz
+pip3 install mysql-connector PyQuery websocket-client  redis  jieba pytz SimpleWebSocketServer numpy
 ```
 
 
@@ -47,14 +47,27 @@ def init_db(ip="localhost", user="root", pw="", db_name="coin"):
 ```
 将其设置为自己的数据库连接字符串，主要是user（用户名）和pw（密码）
 默认情况下，连接字符串你不需要改
-### 定期采集各个站点的新闻
+### 初始化所有币种 
 ```
-python3 index.py
+python3 coin_crawl.py
 ```
 
-### 采集交易所币种消息
+### 定期采集各个站点的新闻服务
 ```
-market_base_common_crawl.py
+python3 start_news_service.py &
+```
+### 开启深度服务
+```
+python3 start_depth_service.py&
+```
+
+### 开启交易信息服务
+```
+python3 start_detail_service.py&
+```
+### 开启分析服务
+```
+python3 start_analyse.py
 ```
 # 网站端
 ./website
