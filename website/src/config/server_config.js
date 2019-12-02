@@ -6,8 +6,8 @@ var server_config = {
 var websocket_url = "ws://www.bixiaozhan";
 var websocket_config = {
   depth_url:websocket_url+":8000",
-  detail_url:websocket_url+"8001",
-  analyse_url:websocket_url+"8002"
+  detail_url:websocket_url+":8001",
+  analyse_url:websocket_url+":8002"
 }
 export {
   server_config,

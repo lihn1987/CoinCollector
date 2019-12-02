@@ -23,7 +23,7 @@ def init_coin_base():
     print("init db")
     try:
         db_cur.execute("""CREATE TABLE `coin_base` (
-            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `id` BIGINT NOT NULL AUTO_INCREMENT,
             `index` varchar(45) DEFAULT NULL,
             `name` varchar(45) DEFAULT NULL,
             `name_en` varchar(45) DEFAULT NULL,
@@ -43,8 +43,8 @@ def init_article2coinbase():
     try:
         db_cur.execute("""
         CREATE TABLE `coin`.`article_2_coinbase`  (
-        `coin_id` int(0) NOT NULL,
-        `article_id` int(0) NOT NULL,
+        `coin_id` BIGINT NOT NULL,
+        `article_id` BIGINT NOT NULL,
         PRIMARY KEY (`coin_id`, `article_id`),
         CONSTRAINT `a` FOREIGN KEY (`coin_id`) REFERENCES `coin`.`coin_base` (`id`),
         CONSTRAINT `b` FOREIGN KEY (`article_id`) REFERENCES `coin`.`article` (`id`)
