@@ -1,5 +1,5 @@
 <template>
-  <div class="Header ">
+  <div class="Header">
     <div class="content clearfix">
       <a href="/#/" class="logo left">{{main_name}}</a>
       <a href="/#/news" class="item right" :class="{ item_active: current==4 }">{{new_name}}</a>
@@ -13,7 +13,7 @@
 <script>
 
 export default {
-  name: 'Header',
+  name: 'mHeader',
   props:{
     current: Number
   },
@@ -32,8 +32,9 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style  lang="scss" scoped>
 @import "../../../style/index.scss";
-$header_height: 76px;
+$header_height: 36px;
 .Header {
+  
   height:$header_height;
   background:#ffffff;
   box-shadow: 0 2px 4px 0px;
@@ -41,20 +42,21 @@ $header_height: 76px;
   z-index: 1;
 }
 .content {
-  margin:0 auto;
-  width: $content_width ;
+  padding:0 0vw;
+  width: 100vw;
 }
 .logo {
   line-height:$header_height;
   font-size:14px;
   color:rgb(74, 74, 74);
   text-decoration:none;
+  margin-left:5vw;
 }
 .item {
   line-height:$header_height;
   font-size:14px;
   color:rgb(74, 74, 74);
-  margin-left:120px;
+  margin:0 5vw;
   text-decoration:none;
 }
 .item_active{

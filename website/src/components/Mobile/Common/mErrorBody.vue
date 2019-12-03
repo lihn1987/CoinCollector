@@ -42,7 +42,7 @@ export default {
 <style lang="scss" scoped>
 @import "../../../style/index.scss";
 .Body{
-  width:$content-width;
+  width:100vw;
   margin:0 auto;
 }
 h1,h2,h3,h4,p{

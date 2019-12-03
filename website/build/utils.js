@@ -1,4 +1,4 @@
-'use strict'
+//'use strict'
 const path = require('path')
 const config = require('../config')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
@@ -11,17 +11,16 @@ exports.assetsPath = function (_path) {
 
   return path.posix.join(assetsSubDirectory, _path)
 }
-
 exports.cssLoaders = function (options) {
   options = options || {}
 
   const cssLoader = {
     loader: 'css-loader',
     options: {
+      minimize: process.env.NODE_ENV === 'production',
       sourceMap: options.sourceMap
     }
   }
-
   const postcssLoader = {
     loader: 'postcss-loader',
     options: {
