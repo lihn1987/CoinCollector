@@ -86,6 +86,19 @@ var coin_order = '';
 var ws = null;
 var time_id = null;
 var disconnected = false;
+var ping_time_id = null;
+var close_time  = null;
+function reset_close_time(){
+  if(close_time){
+    clearTimeout(close_time);
+  }
+  close_time = setTimeout(function(){
+    if(ws){
+      console.log("force close")
+      ws.close();
+    }
+  }, 10000)
+}
 function connect_websocket(coin){
     coin_order = coin;
     var sub_obj = [{
@@ -121,6 +134,14 @@ function connect_websocket(coin){
           console.log(JSON.stringify(sub_obj[item]))
           ws.send(JSON.stringify(sub_obj[item]))
         }
+        if(ping_time_id)clearInterval(ping_time_id);
+        ping_time_id = setInterval(function(){
+          if(ws != null)
+            console.log("发送ping")
+            ws.send(JSON.stringify({ping:0}));
+          },
+        5000);
+        reset_close_time();
     }
     ws.onclose = function(e){
         console.log("服务器关闭");
@@ -131,6 +152,11 @@ function connect_websocket(coin){
         //reconnect_websocket();
     }
     ws.onmessage = function(e){
+        reset_close_time();
+        var json_obj = JSON.parse(e.data)
+        if("pong" in json_obj){
+          return;
+        }
         //console.log(e.data)
         var json_obj = JSON.parse(e.data)
         var key_list = json_obj["type"].split("_");
@@ -152,6 +178,10 @@ function connect_websocket(coin){
 }
 function reconnect_websocket(){
   if(disconnected)return;
+  if(time_id){
+    clearTimeout(time_id);
+    time_id = null;
+  }
   time_id = setTimeout(function () {
 　　　　// f1的任务代码
 　　　　connect_websocket(coin_order);
@@ -162,6 +192,15 @@ function discnnect_websocket(){
   disconnected = true;
   if(time_id != null){
     clearTimeout(time_id)
+    time_id = null;
+  }
+  if(ping_time_id != null){
+    clearInterval(ping_time_id);
+    ping_time_id = null;
+  }
+  if(close_time){
+    clearTimeout(close_time);
+    close_time = null;
   }
   if(ws != null){
     ws.close();

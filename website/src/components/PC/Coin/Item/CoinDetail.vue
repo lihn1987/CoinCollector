@@ -88,7 +88,20 @@ export default {
 var coin_order = '';
 var ws = null;
 var time_id = null;
+var ping_time_id = null;
 var disconnected = false;
+var close_time  = null;
+function reset_close_time(){
+  if(close_time){
+    clearTimeout(close_time);
+  }
+  close_time = setTimeout(function(){
+    if(ws){
+      console.log("force close")
+      ws.close();
+    }
+  }, 10000)
+}
 function connect_websocket(coin){
     coin_order = coin;
     var sub_obj = [{
@@ -124,6 +137,14 @@ function connect_websocket(coin){
           console.log(JSON.stringify(sub_obj[item]))
           ws.send(JSON.stringify(sub_obj[item]))
         }
+        if(ping_time_id)clearInterval(ping_time_id);
+        ping_time_id = setInterval(function(){
+          if(ws != null)
+            console.log("发送ping")
+            ws.send(JSON.stringify({ping:0}));
+          },
+        5000);
+        reset_close_time();
     }
     ws.onclose = function(e){
         console.log("服务器关闭");
@@ -134,7 +155,11 @@ function connect_websocket(coin){
         //reconnect_websocket();
     }
     ws.onmessage = function(e){
+        reset_close_time();
         var json_obj = JSON.parse(e.data)
+        if("pong" in json_obj){
+          return;
+        }
         if(json_obj.order_coin == coin_order && json_obj.market == 0){
           var tmp_array = [];
           for(var item in json_obj.data){
@@ -156,13 +181,17 @@ function connect_websocket(coin){
             tmp_array.push([json_obj.data[item].trade_time, json_obj.data[item].price, json_obj.data[item].amount, json_obj.data[item].dir]);
           }
           tmp_array = tmp_array.reverse();
-          tmp_array = tmp_array.concat(_this.depth_data[1]);
+          tmp_array = tmp_array.concat(_this.depth_data[2]);
           _this.$set(_this.depth_data,2,tmp_array.slice(0,10));
         }
     }
 }
 function reconnect_websocket(){
   if(disconnected)return;
+  if(time_id){
+    clearTimeout(time_id);
+    time_id = null;
+  }
   time_id = setTimeout(function () {
 　　　　// f1的任务代码
 　　　　connect_websocket(coin_order);
@@ -173,6 +202,15 @@ function discnnect_websocket(){
   disconnected = true;
   if(time_id != null){
     clearTimeout(time_id)
+    time_id = null;
+  }
+  if(ping_time_id != null){
+    clearInterval(ping_time_id);
+    ping_time_id = null;
+  }
+  if(close_time){
+    clearTimeout(close_time);
+    close_time = null;
   }
   if(ws != null){
     ws.close();

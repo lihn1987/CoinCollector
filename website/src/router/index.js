@@ -80,5 +80,6 @@ if (flag) {
   console.log('pc端');
 }
 export default new Router({
+  mode: 'history',
   routes: rouMap
 })

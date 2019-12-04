@@ -3,7 +3,7 @@
     <div class="discribe">
       {{discription}}
     </div>
-    <a class="back" href="/#/coin">
+    <a class="back" href="/coin">
       返回
     </a>
   </div>

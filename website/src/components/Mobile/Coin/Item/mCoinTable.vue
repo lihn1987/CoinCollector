@@ -14,7 +14,7 @@
         <td class="item2 ">{{row_list[n-1].name_en}}</td>
         <td class="item3 ">{{row_list[n-1].name_cn}}</td>
         <td class="item4 "><a class="coinbase_describe" v-bind:href="row_list[n-1].official_website">访问</a></td>
-        <td class="item5 "><a class="coinbase_describe" :href="'/#/coin/describe/'+row_list[n-1].id">详情</a></td>
+        <td class="item5 "><a class="coinbase_describe" :href="'/coin/describe/'+row_list[n-1].id">详情</a></td>
       </tr>
     </table>
     <div class= "btn_content clearfix">
