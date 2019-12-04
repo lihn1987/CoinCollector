@@ -1,6 +1,6 @@
 var server_config = {
-    //url: '',
-    url: 'http://a.com',
+    url: '',
+    //url: 'http://a.com',
     port: '80'
 }
 var websocket_url = "ws://www.bxiaozhan.com";
