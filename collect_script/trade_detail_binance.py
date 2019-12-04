@@ -164,7 +164,7 @@ class myThread (threading.Thread):
                 #self.sub_detail()
                 while True:
                     recv_data = self.ws.recv()
-                    print(recv_data)
+                    #:print(recv_data)
                     self.on_recv(recv_data)
             except:
                 print("binance socket error")

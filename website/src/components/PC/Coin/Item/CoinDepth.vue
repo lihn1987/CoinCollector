@@ -85,6 +85,7 @@ export default {
 var coin_order = '';
 var ws = null;
 var time_id = null;
+var ping_time_id = null;
 var disconnected = false;
 function connect_websocket(coin){
     coin_order = coin;
@@ -123,6 +124,12 @@ function connect_websocket(coin){
           console.log(JSON.stringify(sub_obj[item]))
           ws.send(JSON.stringify(sub_obj[item]))
         }
+        ping_time_id = setInterval(function(){
+          if(ws != null)
+            console.log("发送ping")
+            ws.send(JSON.stringify({ping:0}));
+          },
+        5000);
     }
     ws.onclose = function(e){
         console.log("服务器关闭");
@@ -163,6 +170,9 @@ function discnnect_websocket(){
   disconnected = true;
   if(time_id != null){
     clearTimeout(time_id)
+  }
+  if(ping_time_id != null){
+    clearInterval(ping_time_id);
   }
   if(ws != null){
     ws.close();

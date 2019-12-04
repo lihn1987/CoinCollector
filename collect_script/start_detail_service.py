@@ -49,7 +49,7 @@ def min_detail_analyse(key, info_list):
     #进行归类
     time_key = {}
     for info_item in info_list:
-        print(type(info_item["trade_time"]))
+        #print(type(info_item["trade_time"]))
         time_key_item = int(info_item["trade_time"]/1000/60)*1000*60
         if time_key_item not in time_key:
             time_key[time_key_item] = {}
@@ -80,7 +80,7 @@ def min_detail_analyse(key, info_list):
                 data_db[i]["sell"] += time_key[time_key_item]["sell"]
                 break
     #删除多余数据
-    print(key)
+    #print(key)
     if len(data_db) > 60:
         del data_db[60:]
     redis_db.set(key, json.dumps(data_db))
@@ -89,7 +89,7 @@ def hour_line_analyse(key, info_list):
     #进行归类
     time_key = {}
     for info_item in info_list:
-        print(type(info_item["trade_time"]))
+        #print(type(info_item["trade_time"]))
         time_key_item = int(info_item["trade_time"]/1000/60/60)*1000*60*60
         if time_key_item not in time_key:
             time_key[time_key_item] = {}
@@ -120,7 +120,7 @@ def hour_line_analyse(key, info_list):
                 data_db[i]["sell"] += time_key[time_key_item]["sell"]
                 break
     #删除多余数据
-    print(key)
+    #print(key)
     if len(data_db) > 60:
         del data_db[60:]
     redis_db.set(key, json.dumps(data_db))
@@ -128,7 +128,7 @@ def day_line_analyse(key, info_list):
     #进行归类
     time_key = {}
     for info_item in info_list:
-        print(type(info_item["trade_time"]))
+        #print(type(info_item["trade_time"]))
         time_key_item = int(info_item["trade_time"]/1000/60/60/24)*1000*60*60*24
         if time_key_item not in time_key:
             time_key[time_key_item] = {}
@@ -159,7 +159,7 @@ def day_line_analyse(key, info_list):
                 data_db[i]["sell"] += time_key[time_key_item]["sell"]
                 break
     #删除多余数据
-    print(key)
+    #print(key)
     if len(data_db) > 60:
         del data_db[60:]
     redis_db.set(key, json.dumps(data_db))
@@ -171,11 +171,24 @@ trade_detail_binance.run(detail_callback)
 class SimpleChat(WebSocket):
     def __init__(self, server, sock, address):
         WebSocket.__init__(self, server, sock, address)
-
+        self.timer = None
+    #处理超时
+    def reset_timer(self):
+        if self.timer and self.timer.isAlive():
+            self.timer.cancel()
+        self.timer = threading.Timer(10, self.shut_down)
+        self.timer.start()
+    def shut_down(self):
+        print("shutdown")
+        self.close()
     def handleMessage(self):
         json_obj = None
         try:
             json_obj = json.loads(self.data)
+            if "ping" in json_obj:
+                self.reset_timer()
+                self.sendMessage(json.dumps({"pong":json_obj["ping"]}))
+                return
         except:
             self.close()
             print("json解析失败")

@@ -19,11 +19,24 @@ redis_db = redis.Redis(host='localhost', port=6379)
 class SimpleChat(WebSocket):
     def __init__(self, server, sock, address):
         WebSocket.__init__(self, server, sock, address)
-
+        self.timer = None
+    #处理超时
+    def reset_timer(self):
+        if self.timer and self.timer.isAlive():
+            self.timer.cancel()
+        self.timer = threading.Timer(10, self.shut_down)
+        self.timer.start()
+    def shut_down(self):
+        print("shutdown")
+        self.close()
     def handleMessage(self):
         json_obj = None
         try:
             json_obj = json.loads(self.data)
+            if "ping" in json_obj:
+                self.reset_timer()
+                self.sendMessage(json.dumps({"pong":json_obj["ping"]}))
+                return
         except:
             self.close()
             print("json解析失败")

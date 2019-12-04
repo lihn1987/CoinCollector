@@ -31,11 +31,24 @@ threadLock = threading.Lock()
 class SimpleChat(WebSocket):
     def __init__(self, server, sock, address):
         WebSocket.__init__(self, server, sock, address)
-
+        self.timer = None
+    #处理超时
+    def reset_timer(self):
+        if self.timer and self.timer.isAlive():
+            self.timer.cancel()
+        self.timer = threading.Timer(10, self.shut_down)
+        self.timer.start()
+    def shut_down(self):
+        print("shutdown")
+        self.close()
     def handleMessage(self):
         json_obj = None
         try:
             json_obj = json.loads(self.data)
+            if "ping" in json_obj:
+                self.reset_timer()
+                self.sendMessage(json.dumps({"pong":json_obj["ping"]}))
+                return
         except:
             self.close()
             print("json解析失败")
@@ -44,7 +57,7 @@ class SimpleChat(WebSocket):
             self.close()
             print("参数不全")
             return
-        print(json_obj)
+        #print(json_obj)
         if json_obj['method'] == 'sub_depth':
             if 'param' in json_obj and \
             'order_coin' in json_obj['param'] and \
@@ -66,18 +79,31 @@ class SimpleChat(WebSocket):
             self.close()
 
     def handleConnected(self):
-       print(self.address, 'connected')
-       clients.append(self)
+        self.reset_timer()
+        print(self.address, 'connected')
+        clients.append(self)
 
     def handleClose(self):
         clients.remove(self)
         print(self.closed)
-
+import tracemalloc
+tracemalloc.start()
+_count = 0
 class myThread (threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self) 
     def run(self):
+        global _count
         while True:
+            _count = _count + 1
+            if _count % 100 == 0:
+                snapshot = tracemalloc.take_snapshot()
+                top_stats = snapshot.statistics('lineno')
+
+                print("[ Top 10 ]")
+                for stat in top_stats[:10]:
+                    print(stat)
+                
             threadLock.acquire()
             for key in depth_client:
                 #遍历订阅频道
@@ -94,7 +120,7 @@ class myThread (threading.Thread):
                     #将订阅信息发送给每个没断开的订阅者
                     if depth_client[key][i][0].closed == True:
                         depth_client[key].pop(i)
-                        print(depth_client)
+                        #print(depth_client)
                         continue
                     depth_client[key][i][0].sendMessage(str_for_send)
             threadLock.release()

@@ -140,7 +140,6 @@ function connect_websocket(coin){
         //reconnect_websocket();
     }
     ws.onmessage = function(e){
-        console.log(e.data)
         var json_obj = JSON.parse(e.data)
         var key_list = json_obj["type"].split("_");
         if(key_list[0] == "day" && json_obj["data"].length != 0){
