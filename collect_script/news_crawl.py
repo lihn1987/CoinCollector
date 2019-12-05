@@ -5,6 +5,8 @@ import news_8btc
 import news_55coin
 import news_chainnews
 import news_tuoluo
+import news_bshijie_shendu
+import news_bshijie_kuaixun
 import threading
 
 class myThread (threading.Thread):
@@ -26,6 +28,8 @@ def run():
         myThread(news_chainfor.get_news, 10, db_base.insert_article),
         myThread(news_chainnews.get_news, 10, db_base.insert_article),
         myThread(news_tuoluo.get_news, 10, db_base.insert_article),
+        myThread(news_bshijie_shendu.get_news, 10, db_base.insert_article),
+        myThread(news_bshijie_kuaixun.get_news, 10, db_base.insert_article),
         ]
     for i in range(len(thread_list)):
         thread_list[i].start()
