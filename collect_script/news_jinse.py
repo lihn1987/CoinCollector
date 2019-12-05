@@ -39,13 +39,16 @@ def get_news(page_count, cb):
                 item["extra"]['topic_url'],
                 "金色财金")
             source_responce = url_open(article_item.source_addr)
-            source_doc = pq(source_responce)
-            article_item.content = source_doc(".js-article-detail").html() if source_doc(".js-article-detail").html() else source_doc(".js-article").html()
-            index = item['id']
-            if not cb(article_item):
-                error_count+=1
-            else:
-                error_count = 0
+            try:
+                source_doc = pq(source_responce)
+                article_item.content = source_doc(".js-article-detail").html() if source_doc(".js-article-detail").html() else source_doc(".js-article").html()
+                index = item['id']
+                if not cb(article_item):
+                    error_count+=1
+                else:
+                    error_count = 0
+            except:
+                error_count += 1
             if error_count >= 5:
                 break
         if error_count >= 5:
