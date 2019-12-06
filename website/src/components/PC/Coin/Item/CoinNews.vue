@@ -109,12 +109,13 @@ export default {
 @import "../../../../style/index.scss";
 .title {
   font-size:36px;
-  margin-top:36px;
+  padding-top:36px;
+  padding-bottom:36px;
   color:$green;
 }
 .news_list{
   width:600px;
-  margin:36px auto;
+  margin:0 auto;
 }
 .news_title{
   text-align: left;
@@ -152,6 +153,6 @@ export default {
   text-decoration:none;
   display:block;
   width:100px;
-  margin:0 auto 36px auto;
+  margin:0 auto 0 auto;
 }
 </style>
