@@ -41,6 +41,7 @@ import Vue from 'vue'
 import axios from "axios"
 import {server_config} from '../../../config/server_config.js'
 var _this = null;
+var flush_timer = null;
 export default {
   name: 'Header',
   props:{
@@ -71,9 +72,13 @@ export default {
     }
   },created: function(){
     _this = this;
+    flush_timer = setInterval(flush_top, 1000);
     flush_top();
   },destroyed: function(){
-    
+    if(flush_timer){
+      clearInterval(flush_timer);
+      flush_timer = null;
+    }
   },
 }
 function flush_top(){
