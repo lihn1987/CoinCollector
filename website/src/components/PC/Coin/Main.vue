@@ -2,7 +2,7 @@
   <div class="main">
     <Header :current=2 />
     <CoinTable />
-    <CoinNews />
+    <CoinNews class="CoinNews"/>
     <Footer />
   </div>
 </template>
@@ -31,5 +31,8 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
+.CoinNews{
+  width:800px;
+  margin:0 auto;
+}
 </style>

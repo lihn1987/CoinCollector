@@ -59,9 +59,12 @@ twitter_config = {
 }
 result = []
 db_base.init_db()
-for item in twitter_config:
-    twitter_items = run(twitter_config[item], item)
-    result.append(twitter_items)
+
+while True:
+    for item in twitter_config:
+        twitter_items = run(twitter_config[item], item)
+        result.append(twitter_items)
+    time.sleep(60*10)
 print(result)
 
 
