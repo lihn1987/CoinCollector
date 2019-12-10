@@ -33,7 +33,11 @@ export default {
     }
   },
   created: function(){
+    try{
     this.GetPage(0);
+    }catch(e){
+
+    }
   },computed: {
     // 计算属性的 getter
     
@@ -57,7 +61,7 @@ export default {
       })
       .catch( (error) => {
         console.log(error)
-        alert(error)
+        //alert(error)
       });
     },
     addZero(m) {
@@ -114,8 +118,7 @@ export default {
   color:$green;
 }
 .news_list{
-  width:600px;
-  margin:0 auto;
+  margin:24px auto;
 }
 .news_title{
   text-align: left;

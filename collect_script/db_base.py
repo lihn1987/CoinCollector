@@ -18,6 +18,7 @@ def init_db(ip="localhost", user="root", pw="", db_name="coin"):
     init_article2coinbase()
     init_market_base_common()
     init_trade_detail()
+    init_twitter()
 
 def init_coin_base():
     print("init db")
@@ -112,6 +113,26 @@ def init_trade_detail():
         print("db_init ok")
     except:
         print("base table already exist")
+
+def init_twitter():
+    try:
+        db_cur.execute("""CREATE TABLE `coin`.`twitter`  (
+            `id` bigint NOT NULL,
+            `time` bigint NULL,
+            `name` varchar(255) NULL,
+            `username` varchar(255) NULL,
+            `src` varchar(255) NULL,
+            `content` text NULL,
+            `coin_name` varchar(255) NULL,
+            PRIMARY KEY (`id`),
+            INDEX `a`(`time`),
+            INDEX `b`(`coin_name`)
+            );
+        ;""")
+        print("db_init ok")
+    except:
+        print("base table already exist")
+        
 def insert_coin_info(index, name, name_en, name_cn, official_website, description):
     try:
         sql_str = """
@@ -255,6 +276,24 @@ def insert_into_trade_detail(key, trade_list):
     except:
         threadLock.release()
         print("insert error!")
+        return False
+
+def insert_into_twitter(pram):
+    try:
+        sql = "insert into coin.twitter values(%d, %d, '%s', '%s', '%s', '%s','%s')"%(
+            pram["id"],
+            pram["time"],
+            pram["name"],
+            pram["user_name"],
+            pram["src"],
+            pram["content"],
+            pram["coin_name"]
+        )
+        print("lalalaal:"+sql)
+        db_cur.execute(sql)
+        mydb.commit()
+        return True
+    except:
         return False
 
 

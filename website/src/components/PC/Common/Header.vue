@@ -82,45 +82,47 @@ export default {
   },
 }
 function flush_top(){
-var url = server_config.url+"/back/getprice.php?symbel=btc_usdt|eth_usdt|eos_usdt|xrp_usdt";
-    axios.get(
-      url,
-      {
-      method:'get',
-      withCredentials:false,
-    })
-    .then( (response) => {
-      console.log(response.data);
-      var json_obj = response.data["data"];
-      for(var i = 0; i < json_obj.length; i++){
-        switch(json_obj[i]["coin"]){
-          case "BTC_USDT":
-            _this.btc_price = json_obj[i]["close"].toString().slice(0,8);
-            _this.btc_percent = ((json_obj[i]["close"]-json_obj[i]["open"])/json_obj[i]["open"]*100).toString().slice(0,5);
-            _this.btc_dir = (json_obj[i]["close"]-json_obj[i]["open"] > 0)?"↑":"↓";
-            break;
-          case "ETH_USDT":
-            _this.eth_price = json_obj[i]["close"].toString().slice(0,8);
-            _this.eth_percent = ((json_obj[i]["close"]-json_obj[i]["open"])/json_obj[i]["open"]*100).toString().slice(0,5);
-            _this.eth_dir = (json_obj[i]["close"]-json_obj[i]["open"] > 0)?"↑":"↓";
-            break;
-          case "EOS_USDT":
-            _this.eos_price = json_obj[i]["close"].toString().slice(0,8);
-            _this.eos_percent = ((json_obj[i]["close"]-json_obj[i]["open"])/json_obj[i]["open"]*100).toString().slice(0,5);
-            _this.eos_dir = (json_obj[i]["close"]-json_obj[i]["open"] > 0)?"↑":"↓";
-            break;
-          case "XRP_USDT":
-            _this.xrp_price = json_obj[i]["close"].toString().slice(0,8);
-            _this.xrp_percent = ((json_obj[i]["close"]-json_obj[i]["open"])/json_obj[i]["open"]*100).toString().slice(0,5);
-            _this.xrp_dir = (json_obj[i]["close"]-json_obj[i]["open"] > 0)?"↑":"↓";
-            break;
+    try{
+      var url = server_config.url+"/back/getprice.php?symbel=btc_usdt|eth_usdt|eos_usdt|xrp_usdt";
+      axios.get(
+        url,
+        {
+        method:'get',
+        withCredentials:false,
+      })
+      .then( (response) => {
+        console.log(response.data);
+        var json_obj = response.data["data"];
+        for(var i = 0; i < json_obj.length; i++){
+          switch(json_obj[i]["coin"]){
+            case "BTC_USDT":
+              _this.btc_price = json_obj[i]["close"].toString().slice(0,8);
+              _this.btc_percent = ((json_obj[i]["close"]-json_obj[i]["open"])/json_obj[i]["open"]*100).toString().slice(0,5);
+              _this.btc_dir = (json_obj[i]["close"]-json_obj[i]["open"] > 0)?"↑":"↓";
+              break;
+            case "ETH_USDT":
+              _this.eth_price = json_obj[i]["close"].toString().slice(0,8);
+              _this.eth_percent = ((json_obj[i]["close"]-json_obj[i]["open"])/json_obj[i]["open"]*100).toString().slice(0,5);
+              _this.eth_dir = (json_obj[i]["close"]-json_obj[i]["open"] > 0)?"↑":"↓";
+              break;
+            case "EOS_USDT":
+              _this.eos_price = json_obj[i]["close"].toString().slice(0,8);
+              _this.eos_percent = ((json_obj[i]["close"]-json_obj[i]["open"])/json_obj[i]["open"]*100).toString().slice(0,5);
+              _this.eos_dir = (json_obj[i]["close"]-json_obj[i]["open"] > 0)?"↑":"↓";
+              break;
+            case "XRP_USDT":
+              _this.xrp_price = json_obj[i]["close"].toString().slice(0,8);
+              _this.xrp_percent = ((json_obj[i]["close"]-json_obj[i]["open"])/json_obj[i]["open"]*100).toString().slice(0,5);
+              _this.xrp_dir = (json_obj[i]["close"]-json_obj[i]["open"] > 0)?"↑":"↓";
+              break;
+          }
+          console.log(json_obj[i]);
         }
-        console.log(json_obj[i]);
-      }
-    })
-    .catch( (error) => {
-      console.log(error)
-    });
+      })
+      .catch( (error) => {
+        console.log(error)
+      });
+    }catch(e){}
 }
 </script>
 
