@@ -127,12 +127,12 @@ def init_twitter():
             PRIMARY KEY (`id`),
             INDEX `a`(`time`),
             INDEX `b`(`coin_name`)
-            );
+            )DEFAULT CHARSET=utf8;
         ;""")
         print("db_init ok")
     except:
         print("base table already exist")
-        
+
 def insert_coin_info(index, name, name_en, name_cn, official_website, description):
     try:
         sql_str = """

@@ -1,3 +1,4 @@
+
 var server_config = {
     url: '',
     //url: 'http://a.com',

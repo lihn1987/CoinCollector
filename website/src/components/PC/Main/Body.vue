@@ -60,6 +60,7 @@ $right-width: $content_width - $left-width - $margin-width;
 
 .main_page_right{
   margin-top:12px;
+  padding:24px;
   width:$right-width;
   margin-left:$margin-width;
   background-color:#ffffff;

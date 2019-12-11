@@ -1,6 +1,7 @@
 <template>
   <div class="CoinTwitter">
-    <div class="twitter_module_title"> 最新twitter官方新闻</div>
+    <div class="twitter_module_title"> 官方twitter最新新闻</div>
+    <div v-show="!twitter_list.length" style="margin-top:24px;">该项目无twitter或者未被抓取</div>
     <div class="twitter_list">
       <div v-for="n in twitter_list.length">
         <div class="twitter_title">{{twitter_list[n-1]["coin_name"]}}官方</div>
@@ -24,20 +25,18 @@ Vue.component('pagination', Pagination)
 Vue.component('v-page', vPage)
 export default {
   name: 'CoinNews',
+  props:{
+    id: String
+  },
   data () {
     return {
       twitter_list:[],
       twitter_count:0
     }
   },
-  filters:{
-        getTwitterUserHref:function(val){
-            return 'https://www.baidu.com/' + val 
-        }
-    },
   created: function(){
     var size = 5;
-      var url = server_config.url+"/back/gettwitters.php?size="+size;;
+      var url = server_config.url+"/back/gettwittersbycoinid.php?index=0&size="+size+"&coin_id="+this.$props.id;
       axios.get(
         url,
         {
@@ -97,11 +96,8 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss" scoped>
 @import "../../../../style/index.scss";
-.CoinTwitter{
-  //background-color:rgb(222,222,0);
-}
+
 .twitter_list{
-  height:400px;
   overflow-x :hidden;
   overflow-y :auto;
 }

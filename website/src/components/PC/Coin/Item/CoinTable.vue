@@ -16,7 +16,7 @@
         <td class="item3 ">{{row_list[n-1].name_en}}</td>
         <td class="item4 ">{{row_list[n-1].name_cn}}</td>
         <td class="item5 ">{{row_list[n-1].official_website}}</td>
-        <td class="item6 "><a class="coinbase_describe" :href="'/coin/describe/'+row_list[n-1].id">详情</a></td>
+        <td class="item6 "><a class="coinbase_describe" :href="'/coin/describe/'+row_list[n-1].id">详情以及相关新闻指数</a></td>
       </tr>
     </table>
     <v-page  :totalRow="totalRow" :pageSizeMenu="[10, 20, 50]"  @page-change="pageChange" class="v-pagination--center v-page"></v-page>
@@ -124,7 +124,7 @@ tr:nth-child(even) {
 }
 .item3{
   @extend .item ;
-  width:15%;
+  width:7%;
 }
 .item4{
   @extend .item ;
@@ -136,7 +136,7 @@ tr:nth-child(even) {
 }
 .item6{
   @extend .item ;
-  width:10%;
+  width:18%;
 }
 .coinbase_describe {
   text-decoration:none;

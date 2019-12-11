@@ -116,8 +116,6 @@ export default {
   color:$green;
 }
 .news_list{
-  width:600px;
-  margin:36px auto;
 }
 .news_title{
   text-align: left;

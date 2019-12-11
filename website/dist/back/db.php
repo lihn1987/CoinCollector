@@ -148,6 +148,21 @@ class CoinBase{
         }
         //echo json_encode($result,JSON_UNESCAPED_UNICODE);
     }
-    
+    function getTwitterOnCoinInfo ($index, $size, $coin_id){
+        $rtn=array();
+        $sql = "select twitter.* from coin_base,twitter where coin_base.`id`=$coin_id and twitter.coin_name = coin_base.name_en order by `time` desc limit $index, $size";
+        $result = $this->db_conn->query($sql);
+        /*$row = $result->fetch_assoc();
+        $rtn['sell_count'] = $row["amount"];*/
+        if ($result->num_rows > 0) {
+            // 输出数据
+            $rtn['data']=array();
+            while($row = $result->fetch_assoc()) {
+                array_push($rtn['data'], $row);
+            }
+            echo json_encode($rtn,JSON_UNESCAPED_UNICODE);
+        }
+        //echo json_encode($result,JSON_UNESCAPED_UNICODE);
+    }
 };
 ?>
