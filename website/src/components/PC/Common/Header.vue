@@ -54,20 +54,20 @@ export default {
       coin_name: '币圈数据分析',
       stone_name: '股票数据分析',
       new_name: '最新动态',
-      btc_price:'11111111',
-      eth_price:'-2222222',
-      eos_price:'3333333',
-      xrp_price:'66666666',
+      btc_price:'0',
+      eth_price:'0',
+      eos_price:'0',
+      xrp_price:'0',
 
       btc_dir:'↑',
       eth_dir:'↑',
       eos_dir:'↑',
       xrp_dir:'↑',
 
-      btc_percent:'80.88%',
-      eth_percent:'80.33%',
-      eos_percent:'-80.88%',
-      xrp_percent:'-80.88%',
+      btc_percent:'0.00%',
+      eth_percent:'0.00%',
+      eos_percent:'0.00%',
+      xrp_percent:'0.00%',
       
     }
   },created: function(){
@@ -91,7 +91,6 @@ function flush_top(){
         withCredentials:false,
       })
       .then( (response) => {
-        console.log(response.data);
         var json_obj = response.data["data"];
         for(var i = 0; i < json_obj.length; i++){
           switch(json_obj[i]["coin"]){
@@ -116,7 +115,6 @@ function flush_top(){
               _this.xrp_dir = (json_obj[i]["close"]-json_obj[i]["open"] > 0)?"↑":"↓";
               break;
           }
-          console.log(json_obj[i]);
         }
       })
       .catch( (error) => {

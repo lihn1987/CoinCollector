@@ -55,7 +55,6 @@ export default {
           }
         }
         this.twitter_count = response.data.data.length;
-        console.log(this.twitter_list)
       })
       .catch( (error) => {
         console.log(error)

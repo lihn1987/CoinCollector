@@ -144,7 +144,6 @@ function connect_websocket(coin){
         if(ping_time_id)clearInterval(ping_time_id);
         ping_time_id = setInterval(function(){
           if(ws != null)
-            console.log("发送ping")
             ws.send(JSON.stringify({ping:0}));
           },
         5000);

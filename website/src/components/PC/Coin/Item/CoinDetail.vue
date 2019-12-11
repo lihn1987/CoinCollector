@@ -134,7 +134,6 @@ function connect_websocket(coin){
         console.log("连接服务器成功");
         for(var item in sub_obj){
           //ws.send(JSON.stringify(item));
-          console.log(JSON.stringify(sub_obj[item]))
           ws.send(JSON.stringify(sub_obj[item]))
         }
         if(ping_time_id)clearInterval(ping_time_id);

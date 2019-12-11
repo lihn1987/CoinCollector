@@ -46,7 +46,6 @@ export default {
     this.on_page_change(0);
   },methods:{
     on_page_change(n){
-      console.log(n);
       this.now_index += n;
       if(this.now_index < 0){
         this.now_index = 0;

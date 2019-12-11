@@ -128,13 +128,11 @@ function connect_websocket(coin){
         
         for(var item in sub_obj){
           //ws.send(JSON.stringify(item));
-          console.log(JSON.stringify(sub_obj[item]))
           ws.send(JSON.stringify(sub_obj[item]))
         }
         if(ping_time_id)clearInterval(ping_time_id);
         ping_time_id = setInterval(function(){
           if(ws != null)
-            console.log("发送ping")
             ws.send(JSON.stringify({ping:0}));
           },
         5000);

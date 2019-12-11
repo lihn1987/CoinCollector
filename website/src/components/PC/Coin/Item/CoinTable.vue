@@ -8,6 +8,7 @@
         <th>简称</th>
         <th>中文名</th>
         <th>官网</th>
+        <th>项目评分</th>
         <th>详细描述</th>
       </tr>
       <tr v-for="n in row_list.length" >
@@ -16,6 +17,7 @@
         <td class="item3 ">{{row_list[n-1].name_en}}</td>
         <td class="item4 ">{{row_list[n-1].name_cn}}</td>
         <td class="item5 ">{{row_list[n-1].official_website}}</td>
+        <td class="item7 ">0</td>
         <td class="item6 "><a class="coinbase_describe" :href="'/coin/describe/'+row_list[n-1].id">详情以及相关新闻指数</a></td>
       </tr>
     </table>
@@ -44,7 +46,6 @@ export default {
   },methods:{
     pageChange(pInfo){
       
-      console.log(pInfo);//{pageNumber: 1, pageSize: 10}
       var url = server_config.url+"/back/getcoinbase.php?method=get_all&page_idx="+((pInfo.pageNumber-1)*pInfo.pageSize)+"&page_size="+pInfo.pageSize;
       axios.get(
         url,
@@ -94,8 +95,9 @@ th {
 td {
 	vertical-align:text-top;
 	padding:6px 15px 6px 6px;
-	border:1px solid #aaa;
-	}
+  border:1px solid #aaa;
+  text-align:left;
+}
 
 tr:nth-child(odd) {
 	background-color:#F5F5F5;
@@ -116,7 +118,7 @@ tr:nth-child(even) {
 }
 .item1{
   @extend .item ;
-  width:10%;
+  width:5%;
 }
 .item2{
   @extend .item ;
@@ -128,7 +130,7 @@ tr:nth-child(even) {
 }
 .item4{
   @extend .item ;
-  width:20%;
+  width:15%;
 }
 .item5{
   @extend .item ;
@@ -137,6 +139,10 @@ tr:nth-child(even) {
 .item6{
   @extend .item ;
   width:18%;
+}
+.item7{
+  @extend .item ;
+  width:10%;
 }
 .coinbase_describe {
   text-decoration:none;

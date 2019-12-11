@@ -56,7 +56,18 @@ twitter_config = {
 "LTC":"LitecoinProject",
 "XRP":"Ripple",
 "ETH":"VitalikButerin",
+"USDT":"Tether_to",
+"TRON":"Tronfoundation",
+"HT":"HuobiGlobal",
+"NEO":"neo_blockchain",
+"IOTA":"iotatoken",
+"XTZ":"tezos",
+"ADA":"cardano",
+"ATOM":"cosmos",
+"OKB":"OKEx",
+"LINK":"smart_contract"
 }
+
 result = []
 db_base.init_db()
 

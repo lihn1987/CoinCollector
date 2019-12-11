@@ -57,7 +57,6 @@ export default {
         }
         this.new_list = this.new_list.concat(response.data.list);
         this.page_idx+=1;
-        console.log(this.new_list)
       })
       .catch( (error) => {
         console.log(error)

@@ -45,7 +45,6 @@ export default {
       });
   },methods:{
     pageChange(pInfo){
-      console.log(pInfo);//{pageNumber: 1, pageSize: 10}
     },
   }
 }

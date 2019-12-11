@@ -19,6 +19,8 @@ def init_db(ip="localhost", user="root", pw="", db_name="coin"):
     init_market_base_common()
     init_trade_detail()
     init_twitter()
+    init_github()
+    init_score()
 
 def init_coin_base():
     print("init db")
@@ -108,7 +110,6 @@ def init_trade_detail():
             PRIMARY KEY (`id`),
             INDEX `a`(`trade_time`, `market`, `order_coin`, `base_coin`, `amount`, `dir`, `price`)
             );
-
         ;""")
         print("db_init ok")
     except:
@@ -133,6 +134,53 @@ def init_twitter():
     except:
         print("base table already exist")
 
+def init_github():
+    try:
+        db_cur.execute('''
+        CREATE TABLE `coin`.`github`  (
+        `coin_name` varchar(255) NULL,
+        `time` bigint(0) NULL,
+        `commit_count` int(255) NULL,
+        INDEX `a`(`coin_name`, `time`)
+        );
+        ''')
+        print("db_init ok")
+    except:
+        print("base table already exist")
+
+def init_score():
+    try:
+        db_cur.execute('''
+        CREATE TABLE `coin`.`score`  (
+        `coin_name` varchar(255) NULL,
+        `time` bigint(0) NULL,
+        `score_all` varchar(255) NULL,
+        `score_1` varchar(255) NULL,
+        `score_2` varchar(255) NULL,
+        `score_3` varchar(255) NULL,
+        `score_4` varchar(255) NULL,
+        `score_5` varchar(255) NULL,
+        `score_6` varchar(255) NULL,
+        `score_7` varchar(255) NULL,
+        `score_8` varchar(255) NULL,
+        `score_9` varchar(255) NULL,
+        `score_10` varchar(255) NULL,
+        `score_11` varchar(255) NULL,
+        `score_12` varchar(255) NULL,
+        `score_13` varchar(255) NULL,
+        `score_14` varchar(255) NULL,
+        `score_15` varchar(255) NULL,
+        `score_16` varchar(255) NULL,
+        `score_17` varchar(255) NULL,
+        `score_18` varchar(255) NULL,
+        `score_19` varchar(255) NULL,
+        `score_20` varchar(255) NULL,
+        INDEX `a`(`coin_name`, `time`, `score_all`)
+        );
+        ''')
+        print("db_init ok")
+    except:
+        print("base table already exist")
 def insert_coin_info(index, name, name_en, name_cn, official_website, description):
     try:
         sql_str = """
@@ -289,16 +337,35 @@ def insert_into_twitter(pram):
             pram["content"],
             pram["coin_name"]
         )
-        print("lalalaal:"+sql)
         db_cur.execute(sql)
         mydb.commit()
         return True
     except:
         return False
 
+def insert_into_github(param):
+    try:
+        sql = "insert into github values('%s', %d, %d)"%(param['coin_name'], param['time'], param['commit_count'])
+        print(sql)
+        db_cur.execute(sql)
+        mydb.commit()
+        return True
+    except:
+        return False
 
-
-
-
+def insert_into_score(coin_name, stamp, score_all,score_list):
+    try:
+        sql = """insert into score values('%s', %d, '%s', 
+        '{0[0]}', '{0[1]}', '{0[2]}', '{0[3]}', '{0[4]}', 
+        '{0[5]}', '{0[6]}', '{0[7]}', '{0[8]}', '{0[9]}', 
+        '{0[10]}', '{0[11]}', '{0[12]}', '{0[13]}', '{0[14]}', 
+        '{0[15]}', '{0[16]}', '{0[17]}', '{0[18]}', '{0[19]}')"""%(coin_name, stamp, score_all)
+        sql = sql.format(score_list)
+        print(sql)
+        db_cur.execute(sql)
+        mydb.commit()
+        return True
+    except:
+        return False
 
 threadLock = threading.Lock()
