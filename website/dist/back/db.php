@@ -196,7 +196,7 @@ class CoinBase{
         $rtn['data'] = array();
         $sql = "select count(*) as count from coin_base, article_2_coinbase ,article
             where 
-            coin_base.id = 3962 and 
+            coin_base.id = $id and 
             coin_base.id = article_2_coinbase.coin_id and 
             article_2_coinbase.article_id = article.id and 
             time_utc > ".(time()-60*60*24*7);
@@ -211,7 +211,7 @@ class CoinBase{
         }
         $sql = "select count(*) as count from twitter,coin_base
         where 
-        coin_base.id = 3982 and
+        coin_base.id = $id and
         coin_base.name_en = twitter.coin_name and          
         time > ".(time()*1000-1000*60*60*24*7);
         $result = $this->db_conn->query($sql);
