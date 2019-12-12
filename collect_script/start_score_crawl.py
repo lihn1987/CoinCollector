@@ -54,7 +54,7 @@ for item in fetch_list:
     analyse_item["commit_all"] = 100 if analyse_item["commit_all"]>1000 else analyse_item["commit_all"]/1000*100
     analyse_item["commit_7d"] = 100 if analyse_item["commit_7d"]>7 else analyse_item["commit_7d"]/7*100
     analyse_item["media_7d"] = 100 if analyse_item["media_7d"]>7 else analyse_item["media_7d"]/7*100
-    analyse_item["media_official_7d"] = 100 if analyse_item["media_official_7d"]>7 else analyse_item["media_official_7d"]/7*100
+    analyse_item["media_official_7d"] = 100 if analyse_item["media_official_7d"]>14 else analyse_item["media_official_7d"]/14*100
     analyse_item["score"] = \
         analyse_item["commit_all"]*0.3+\
         analyse_item["commit_7d"]*0.3+\

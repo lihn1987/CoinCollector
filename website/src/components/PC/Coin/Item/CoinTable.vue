@@ -17,7 +17,7 @@
         <td class="item3 ">{{row_list[n-1].name_en}}</td>
         <td class="item4 ">{{row_list[n-1].name_cn}}</td>
         <td class="item5 ">{{row_list[n-1].official_website}}</td>
-        <td class="item7 ">0</td>
+        <td class="item7 ">{{row_list[n-1].score_all.slice(0,5)}}</td>
         <td class="item6 "><a class="coinbase_describe" :href="'/coin/describe/'+row_list[n-1].id">详情以及相关新闻指数</a></td>
       </tr>
     </table>
@@ -57,6 +57,7 @@ export default {
         let res_obj = response.data;
         this.totalRow=Number(response.data.count);
         this.row_list=response.data.list;
+        console.log(this.row_list);
       })
       .catch( (error) => {
         alert(error)

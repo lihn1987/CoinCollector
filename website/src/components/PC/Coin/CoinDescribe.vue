@@ -2,6 +2,7 @@
   <div class="main">
     <Header :current=2 />
     <CoinDescribeIntruduce :id="this.$route.params.id" />
+    <CoinScore :id="this.$route.params.id" />
     <CoinDepth :id="this.$route.params.id" />
     <CoinDetail :id="this.$route.params.id" />
     <CoinTradeInfo :id="this.$route.params.id" />
@@ -22,6 +23,7 @@ import CoinDepth from './Item/CoinDepth'
 import CoinDetail from './Item/CoinDetail'
 import CoinTradeInfo from './Item/CoinTradeInfo'
 import CoinTwitterOnCoin from './Item/CoinTwitterOnCoin'
+import CoinScore from './Item/CoinScore'
 Vue.component('Header', Header)
 Vue.component('CoinDescribeIntruduce', CoinDescribeIntruduce)
 Vue.component('CoinNewsOnCoin', CoinNewsOnCoin)
@@ -30,6 +32,7 @@ Vue.component('CoinDepth', CoinDepth)
 Vue.component('CoinDetail', CoinDetail)
 Vue.component('CoinTradeInfo', CoinTradeInfo)
 Vue.component('CoinTwitterOnCoin', CoinTwitterOnCoin)
+Vue.component('CoinScore', CoinScore)
 
 
 
