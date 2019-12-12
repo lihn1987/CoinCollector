@@ -67,7 +67,7 @@ class myThread (threading.Thread):
         self.timer.start()
     def run(self):
         while True:
-            #try:
+            try:
                 self.connect()
                 #启动定时器
                 if self.ws.connected:
@@ -80,7 +80,7 @@ class myThread (threading.Thread):
                         print("huobi recive 空")
                         break
                     self.on_recv(gzip.decompress(recv_data).decode())
-            #except:
+            except:
                 print("huobi socket error")
                 pass
 
