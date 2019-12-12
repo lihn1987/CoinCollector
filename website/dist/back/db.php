@@ -23,7 +23,12 @@ class CoinBase{
         $row = $result->fetch_assoc();
         $rtn['count'] = $row['count'];
         $rtn['list'] = array();
-        $sql = "SELECT `id`, `index`, `name`, `name_en`, `name_cn`, `official_website` FROM `coin_base` order by CONVERT(`index`, UNSIGNED INTEGER) limit $index_from, $index_to ";
+        $sql = "select * from (
+            select coin_base.*, score.score_all from coin_base,(select * from score as a where `time` = 
+            (select max(time) from score as b where b.coin_name=a.coin_name )) as score where coin_base.name_en = score.coin_name 
+            UNION
+            select *,'no' as score_all from coin_base where coin_base.name_en not in (select score.coin_name from score)
+            )as base order by  CONVERT(`score_all`,  DECIMAL)  desc limit $index_from, $index_to ";
         $result = $this->db_conn->query($sql);
 
         if ($result->num_rows > 0) {
@@ -163,6 +168,62 @@ class CoinBase{
             echo json_encode($rtn,JSON_UNESCAPED_UNICODE);
         }
         //echo json_encode($result,JSON_UNESCAPED_UNICODE);
+    }
+
+    function getCommit ($id){
+        $rtn=array();
+        $sql = "select max(commit_count) as max,min(commit_count) as min from github,coin_base  where `time`>".(time()-60*60*24*7)." and coin_base.name_en=github.coin_name and coin_base.id=$id group by coin_name";
+        $result = $this->db_conn->query($sql);
+        $rtn['data'] = array();
+        /*$row = $result->fetch_assoc();
+        $rtn['sell_count'] = $row["amount"];*/
+        if ($result->num_rows > 0) {
+            while($row = $result->fetch_assoc()) {
+                $rtn['data']["max"]=$row["max"];
+                $rtn['data']["count"]=$row["max"]-$row["min"];
+                break;
+            }
+            
+        }else{
+            $rtn['data']["max"]="未开源或未抓取";
+            $rtn['data']["count"]="未开源或未抓取";
+        }
+        echo json_encode($rtn,JSON_UNESCAPED_UNICODE);
+    }
+
+    function getNewsCount($id){
+        $rtn=array();
+        $rtn['data'] = array();
+        $sql = "select count(*) as count from coin_base, article_2_coinbase ,article
+            where 
+            coin_base.id = 3962 and 
+            coin_base.id = article_2_coinbase.coin_id and 
+            article_2_coinbase.article_id = article.id and 
+            time_utc > ".(time()-60*60*24*7);
+        $result = $this->db_conn->query($sql);
+        if ($result->num_rows > 0) {
+            while($row = $result->fetch_assoc()) {
+                $rtn['data']['media_news_count'] = $row["count"];
+                break;
+            }
+        }else{
+            $rtn['data']['media_news_count'] = 0;
+        }
+        $sql = "select count(*) as count from twitter,coin_base
+        where 
+        coin_base.id = 3982 and
+        coin_base.name_en = twitter.coin_name and          
+        time > ".(time()*1000-1000*60*60*24*7);
+        $result = $this->db_conn->query($sql);
+        if ($result->num_rows > 0) {
+            while($row = $result->fetch_assoc()) {
+                $rtn['data']['offical_news_count'] = $row["count"];
+                break;
+            }
+        }else{
+            $rtn['data']['offical_news_count'] = "无官网新闻或未抓取";
+        }
+        echo json_encode($rtn,JSON_UNESCAPED_UNICODE);
     }
 };
 ?>
