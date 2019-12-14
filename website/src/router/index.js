@@ -6,6 +6,7 @@ import Coin from '@/components/PC/Coin/Main'
 import CoinDescribe from '@/components/PC/Coin/CoinDescribe'
 import Stone from '@/components/PC/Stone/Main'
 import News from '@/components/PC/News/Main'
+import Translate from '@/components/PC/Translate/Main'
 
 import mMain from '@/components/Mobile/Main/mMain'
 import mCoin from '@/components/Mobile/Coin/mMain'
@@ -39,6 +40,11 @@ var route_pc = [
     path: '/News',
     name: 'News',
     component: News
+  },
+  {
+    path: '/Translate',
+    name: 'Translate',
+    component: Translate
   }]
 
 var route_mobile = [

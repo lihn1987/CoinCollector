@@ -3,7 +3,7 @@
     <div class="content clearfix">
       <a href="/" class="logo left">{{main_name}}</a>
       <a href="/news" class="item right" :class="{ item_active: current==4 }">{{new_name}}</a>
-      <!-- <a href="/stone" class="item right" :class="{ item_active: current==3 }">{{stone_name}}</a> -->
+      <a href="/translate" class="item right" :class="{ item_active: current==3 }">{{translate_name}}</a> 
       <a href="/coin" class="item right" :class="{ item_active: current==2 }">{{coin_name}}</a>
       <a href="/" class="item right" :class="{ item_active: current==1 }">{{page_home}}</a>
     </div>
@@ -53,6 +53,7 @@ export default {
       page_home: '首页',
       coin_name: '币圈数据分析',
       stone_name: '股票数据分析',
+      translate_name: '模拟交易',
       new_name: '最新动态',
       btc_price:'0',
       eth_price:'0',

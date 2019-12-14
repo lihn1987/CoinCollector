@@ -203,6 +203,7 @@ def insert_coin_info(index, name, name_en, name_cn, official_website, descriptio
 
 def insert_article(article_item):
     try:
+        
         sql = """insert into article values(DEFAULT, %d,'%s','%s','%s','%s','%s','%s')
             """%(article_item.time_utc,
             article_item.title,
