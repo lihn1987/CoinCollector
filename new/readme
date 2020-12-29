@@ -1,0 +1,2 @@
+pip3 install  websocket_client -i https://pypi.tuna.tsinghua.edu.cn/simple
+pip3 install numpy -i https://pypi.tuna.tsinghua.edu.cn/simple
