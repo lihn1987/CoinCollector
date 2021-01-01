@@ -4,68 +4,66 @@ import threading
 import time
 import gzip
 import websocket
-import pickle
 import zlib
 import numpy
 import sys
 import time
-from depth_info import DepthInfo
 from config import config
-
+import redis
 def OnChange(depth_info, change_info):
     #修改卖盘
     for_change = change_info['data'][0]['asks']
     for_change.reverse()
-    for i in range(len(depth_info.forsell)-1, -1, -1):
+    for i in range(len(depth_info["forsell"])-1, -1, -1):
         while True:
             if len(for_change) == 0 :
                 break
-            if len(for_change) != 0 and depth_info.forsell[i][0] == for_change[0][0] and for_change[0][1] == '0':
+            if len(for_change) != 0 and depth_info["forsell"][i][0] == for_change[0][0] and for_change[0][1] == '0':
                 #需要删除的
-                depth_info.forsell.pop(i)
+                depth_info["forsell"].pop(i)
                 for_change.pop(0)
                 break
 
-            elif len(for_change) != 0 and depth_info.forsell[i][0] == for_change[0][0] and for_change[0][1] != '0':
+            elif len(for_change) != 0 and depth_info["forsell"][i][0] == for_change[0][0] and for_change[0][1] != '0':
                 #需要修改的
-                depth_info.forsell[i][1] = for_change[0][1]
+                depth_info["forsell"][i][1] = for_change[0][1]
                 for_change.pop(0)
                 continue
         
-            elif len(for_change) != 0 and float(depth_info.forsell[i][0]) < float(for_change[0][0]):
-                depth_info.forsell.insert(i+1, for_change[0][0:2])
+            elif len(for_change) != 0 and float(depth_info["forsell"][i][0]) < float(for_change[0][0]):
+                depth_info["forsell"].insert(i+1, for_change[0][0:2])
                 for_change.pop(0)
                 continue
 
             break
-            
         if len(for_change) == 0 :
             break
         if i == 0:
             for_change.reverse()
             if len(for_change):
-                depth_info.forsell = numpy.array(for_change)[:,0:2].tolist()+depth_info.forsell
+                depth_info["forsell"] = numpy.array(for_change)[:,0:2].tolist()+depth_info["forsell"]
+
     #修改买盘
     for_change = change_info['data'][0]['bids']
     for_change.reverse()
-    for i in range(len(depth_info.forbuy)-1, -1, -1):
+    for i in range(len(depth_info["forbuy"])-1, -1, -1):
         while True:
             if len(for_change) == 0 :
                 break
-            if len(for_change) != 0 and depth_info.forbuy[i][0] == for_change[0][0] and for_change[0][1] == '0':
+            if len(for_change) != 0 and depth_info["forbuy"][i][0] == for_change[0][0] and for_change[0][1] == '0':
                 #需要删除的
-                depth_info.forbuy.pop(i)
+                depth_info["forbuy"].pop(i)
                 for_change.pop(0)
                 break
 
-            elif len(for_change) != 0 and depth_info.forbuy[i][0] == for_change[0][0] and for_change[0][1] != '0':
+            elif len(for_change) != 0 and depth_info["forbuy"][i][0] == for_change[0][0] and for_change[0][1] != '0':
                 #需要修改的
-                depth_info.forbuy[i][1] = for_change[0][1]
+                depth_info["forbuy"][i][1] = for_change[0][1]
                 for_change.pop(0)
                 continue
         
-            elif len(for_change) != 0 and float(depth_info.forbuy[i][0]) > float(for_change[0][0]):
-                depth_info.forbuy.insert(i+1, for_change[0][0:2])
+            elif len(for_change) != 0 and float(depth_info["forbuy"][i][0]) > float(for_change[0][0]):
+                depth_info["forbuy"].insert(i+1, for_change[0][0:2])
                 for_change.pop(0)
                 continue
 
@@ -76,8 +74,7 @@ def OnChange(depth_info, change_info):
         if i == 0:
             for_change.reverse()
             if len(for_change):
-                depth_info.forbuy = numpy.array(for_change)[:,0:2].tolist()+depth_info.forbuy
-
+                depth_info["forbuy"] = numpy.array(for_change)[:,0:2].tolist()+depth_info["forbuy"]
     #depth_info.dump()
 
 
@@ -89,11 +86,10 @@ class myThread (threading.Thread):
         self.coin_dict = {}
         self.ws = websocket.WebSocket()
         self.timer = None
-        self.info = {
-            "deep_info":{},
-            "xxx_info":{}
-        }
-
+        self.info = {}
+        self.redis_db = redis.Redis(host=config["redis_config"]["host"], port=config["redis_config"]["port"])
+        for coin in coin_list:
+            self.info[tuple(coin)] = {}
     def connect(self):
         if config["proxy_config"]["proxy_use"]:
             self.ws.connect("wss://real.okex.com:8443/ws/v3", http_proxy_host=config["proxy_config"]["proxy_ip"], http_proxy_port=config["proxy_config"]["proxy_port"])
@@ -106,29 +102,32 @@ class myThread (threading.Thread):
         json_data = json.loads(str)
         if 'event' not in json_data and json_data['action'] == 'partial':
             time_now = time.time()*1000#毫秒
-            info = DepthInfo()
-            self.info["deep_info"][json_data['data'][0]['instrument_id'].split("-")[0]+json_data['data'][0]['instrument_id'].split("-")[1]] = info
-            info.order_coin = json_data['data'][0]['instrument_id'].split("-")[0]
-            info.base_coin = json_data['data'][0]['instrument_id'].split("-")[1]
-            info.forbuy = numpy.array(json_data['data'][0]['bids'])[:,0:2].tolist()
-            info.forsell = numpy.array(json_data['data'][0]['asks'])[:,0:2].tolist()
+            info = self.info[(json_data['data'][0]['instrument_id'].split("-")[0],json_data['data'][0]['instrument_id'].split("-")[1])]
+            info["order_coin"] = json_data['data'][0]['instrument_id'].split("-")[0]
+            info["base_coin"] = json_data['data'][0]['instrument_id'].split("-")[1]
+            info["forbuy"] = numpy.array(json_data['data'][0]['bids'])[:,0:2].tolist()
+            info["forsell"] = numpy.array(json_data['data'][0]['asks'])[:,0:2].tolist()
 
             d = time.strptime(json_data['data'][0]['timestamp'], "%Y-%m-%dT%H:%M:%S.%fZ")
             timeStamp = (time.mktime(d))+8*60*60
-            info.up_time = timeStamp*1000
-            info.market = 1
-            print("深度延时", time_now-timeStamp*1000)
+            info["up_time"] = timeStamp*1000
+            info["market"] = 1
+            info["delay"] = time_now-timeStamp*1000
+            k = info["order_coin"]+"-"+info["base_coin"]+"-OK"
+            v = json.dumps(info)
+            self.redis_db.set(k, v)
 
         elif 'event' not in json_data and json_data['action'] == 'update':
             time_now = time.time()*1000#毫秒
-            info = self.info["deep_info"][json_data['data'][0]['instrument_id'].split("-")[0]+json_data['data'][0]['instrument_id'].split("-")[1]]
+            info = self.info[(json_data['data'][0]['instrument_id'].split("-")[0],json_data['data'][0]['instrument_id'].split("-")[1])]
             OnChange(info, json_data)
             d = time.strptime(json_data['data'][0]['timestamp'], "%Y-%m-%dT%H:%M:%S.%fZ")
             timeStamp = (time.mktime(d))+8*60*60
-            info.up_time = timeStamp*1000
-            print("深度延时", time_now-timeStamp*1000)
-            #key = "1_"+json_data['data'][0]['instrument_id'].split("-")[0]+"_"+json_data['data'][0]['instrument_id'].split("-")[1]
-            #self.redis_db.set(key, pickle.dumps(info))
+            info["up_time"] = timeStamp*1000
+            k = info["order_coin"]+"-"+info["base_coin"]+"-OK"
+            v = json.dumps(info)
+            self.redis_db.set(k, v)
+            
 
     def shutdown(self):
         print("shutdown")

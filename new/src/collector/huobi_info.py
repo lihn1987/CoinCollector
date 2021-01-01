@@ -4,10 +4,9 @@ import threading
 import time
 import gzip
 import websocket
-import pickle
-from depth_info import DepthInfo
 from config import config
 import sys
+import redis
 
 class myThread (threading.Thread):
     def __init__(self, coin_list):
@@ -18,13 +17,10 @@ class myThread (threading.Thread):
         #保存 BTCUSDT =》 BTC USDT
         self.coin_dict = {}
 
-        #保存所有抓取的最新信息状态
-        self.info = {
-            "deep_info":{},
-            "xxx_info":{}
-        }
+
         self.huobi_ws = websocket.WebSocket()
         self.timer = None
+        self.redis_db = redis.Redis(host=config["redis_config"]["host"], port=config["redis_config"]["port"])
 
     def connect(self):
         if config["proxy_config"]["proxy_use"]:
@@ -42,15 +38,19 @@ class myThread (threading.Thread):
             self.send_data(send_data)
         elif 'ch' in json_data:
             time_now = time.time()*1000#毫秒
-            deep_info = DepthInfo()
-            deep_info.up_time = json_data['ts']
-            deep_info.order_coin = self.coin_dict[json_data['ch'].split(".")[1].upper()][0]
-            deep_info.base_coin = self.coin_dict[json_data['ch'].split(".")[1].upper()][1]
-            deep_info.forbuy = json_data['tick']['bids']
-            deep_info.forsell = json_data['tick']['asks']
-            deep_info.market = 0
-            self.info["deep_info"][deep_info.order_coin + deep_info.base_coin] = deep_info
-            print("深度延时", time_now-deep_info.up_time)
+            deep_info = {}
+            deep_info["up_time"] = json_data['ts']
+            deep_info["order_coin"] = self.coin_dict[json_data['ch'].split(".")[1].upper()][0]
+            deep_info["base_coin"] = self.coin_dict[json_data['ch'].split(".")[1].upper()][1]
+            deep_info["forbuy"] = json_data['tick']['bids']
+            deep_info["forsell"] = json_data['tick']['asks']
+            deep_info["market"] = 0
+            deep_info["delay"] = (time_now-deep_info["up_time"])
+            #保存到redis
+            k = deep_info["order_coin"]+"-"+deep_info["base_coin"]+"-HUOBI"
+            v = json.dumps(deep_info)
+            self.redis_db.set(k, v)
+            #print("深度延时", time_now-deep_info.up_time)
             #print(self.info)
             #key = "0_"+self.coin_dict[json_data['ch'].split(".")[1].upper()][0]+"_"+self.coin_dict[json_data['ch'].split(".")[1].upper()][1]
 
@@ -115,6 +115,7 @@ if __name__ == "__main__":
     coin_pair_list = arg1.split(",")
     for item in coin_pair_list:
         coin_list.append(item.split("-"))
+    print(coin_list)
     StartCrwal(coin_list)
     while True:
         time.sleep(1)

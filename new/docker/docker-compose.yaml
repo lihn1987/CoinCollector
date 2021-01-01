@@ -1,0 +1,37 @@
+version: '3'
+
+
+services:
+    coin_collector:
+        container_name: coin_collector
+        image: lihn1011/coin_collector:0.1
+        volumes:
+            - ../src/collector/:/data/ 
+        restart: always
+        command: /bin/bash -c "cd /data/; python3 main.py; while true;do sleep 1 ; done"
+
+    redis:
+        container_name: redis
+        image: lihn1011/redis:0.1
+        volumes:
+            - ./volumes/redis/config/redis.conf:/usr/local/etc/redis/redis.conf
+            - ./volumes/redis/data/:/data/
+
+        restart: always
+        ports:
+          - "6379:6379"
+    nginx:
+        container_name: nginx
+        image: lihn1011/nginx:0.4
+        command: /bin/bash -c "/usr/sbin/nginx; /usr/sbin/php-fpm7.4; /usr/sbin/sshd;while true;do sleep 1 ; done"
+        volumes:
+            
+            - ./volumes/nginx/config/default:/etc/nginx/sites-enabled/default
+            - ../src/website/front_end/dist/:/var/www/html/
+            - ../src/website/php/coin_view/:/var/www/html/coin_view/
+        restart: always
+        ports:
+            - "80:80"
+            - "443:443"
+
+# 6379    redis port
