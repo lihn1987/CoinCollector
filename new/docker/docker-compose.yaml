@@ -4,7 +4,7 @@ version: '3'
 services:
     coin_collector:
         container_name: coin_collector
-        image: lihn1011/coin_collector:0.1
+        image: lihn1011/coin_collector:0.2
         volumes:
             - ../src/collector/:/data/ 
         restart: always
