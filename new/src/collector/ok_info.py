@@ -91,10 +91,12 @@ class myThread (threading.Thread):
         for coin in coin_list:
             self.info[tuple(coin)] = {}
     def connect(self):
+        print("start connect")
         if config["proxy_config"]["proxy_use"]:
             self.ws.connect("wss://real.okex.com:8443/ws/v3", http_proxy_host=config["proxy_config"]["proxy_ip"], http_proxy_port=config["proxy_config"]["proxy_port"])
         else:
             self.ws.connect("wss://real.okex.com:8443/ws/v3")
+        print("end connect")
 
     def on_recv(self, str):
         
@@ -124,6 +126,7 @@ class myThread (threading.Thread):
             d = time.strptime(json_data['data'][0]['timestamp'], "%Y-%m-%dT%H:%M:%S.%fZ")
             timeStamp = (time.mktime(d))+8*60*60
             info["up_time"] = timeStamp*1000
+            info["delay"] = time_now-timeStamp*1000
             k = info["order_coin"]+"-"+info["base_coin"]+"-OK"
             v = json.dumps(info)
             self.redis_db.set(k, v)

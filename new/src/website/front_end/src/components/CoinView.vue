@@ -11,43 +11,55 @@
             prop="coin_pair"
             label="交易对"
             sortable
-            width="180">
+            width="140">
           </el-table-column>
           <el-table-column
             prop="huobi_lowest_sell"
             label="火币最低卖价"
             sortable
-            width="180">
+            width="140">
           </el-table-column>
           <el-table-column
             prop="huobi_highest_buy"
             label="火币最高买价"
             sortable
-            width="180">
+            width="140">
           </el-table-column>
           <el-table-column
             prop="ok_lowest_sell"
             label="ok最低卖价"
             sortable
-            width="180">
+            width="140">
           </el-table-column>
           <el-table-column
             prop="ok_highest_buy"
             label="ok最高买价"
             sortable
-            width="180">
+            width="140">
           </el-table-column>
           <el-table-column
             prop="huobi_buy_profit"
             label="火币购买价差"
             sortable
-            width="180">
+            width="140">
           </el-table-column>
           <el-table-column
             prop="ok_buy_profit"
             label="ok购买价差"
             sortable
-            width="180">
+            width="140">
+          </el-table-column>
+          <el-table-column
+            prop="huobi_delay"
+            label="火币深度延时"
+            sortable
+            width="140">
+          </el-table-column>
+          <el-table-column
+            prop="ok_delay"
+            label="OK深度延时"
+            sortable
+            width="140">
           </el-table-column>
 
         </el-table>
@@ -111,10 +123,13 @@ export default {
             coin_pair: result[i].order_coin + '-' + result[i].base_coin,
             huobi_lowest_sell: result[i].forsell_HUOBI,
             huobi_highest_buy: result[i].forbuy_HUOBI,
+            
             ok_lowest_sell: result[i].forsell_OK,
             ok_highest_buy: result[i].forbuy_OK,
             huobi_buy_profit: ((result[i].forbuy_HUOBI - result[i].forsell_OK) * 100 / result[i].forbuy_HUOBI).toFixed(2),
-            ok_buy_profit: ((result[i].forbuy_OK - result[i].forsell_HUOBI) * 100 / result[i].forbuy_OK).toFixed(2)
+            ok_buy_profit: ((result[i].forbuy_OK - result[i].forsell_HUOBI) * 100 / result[i].forbuy_OK).toFixed(2),
+            huobi_delay:result[i].delay_HUOBI.toFixed(0),
+            ok_delay:result[i].delay_OK.toFixed(0),
           })
         }
       }).catch(function (error) {

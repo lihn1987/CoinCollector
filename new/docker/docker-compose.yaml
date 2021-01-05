@@ -4,11 +4,14 @@ version: '3'
 services:
     coin_collector:
         container_name: coin_collector
-        image: lihn1011/coin_collector:0.2
+        image: lihn1011/coin_collector:0.4
         volumes:
             - ../src/collector/:/data/ 
         restart: always
         command: /bin/bash -c "cd /data/; python3 main.py; while true;do sleep 1 ; done"
+        extra_hosts:
+            - "api.huobi.pro:104.16.232.188"
+            - "real.okex.com:104.19.212.87"
 
     redis:
         container_name: redis
