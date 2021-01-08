@@ -31,7 +31,7 @@ class myThread (threading.Thread):
     def on_huobi_recv(self, str):
         self.reset_timer()
         json_data = json.loads(str)
-        
+
         #对ping pong 的处理
         if 'ping' in json_data:
             send_data = {'pong':json_data['ping']}
@@ -40,14 +40,14 @@ class myThread (threading.Thread):
             time_now = time.time()*1000#毫秒
             deep_info = {}
             deep_info["up_time"] = json_data['ts']
-            deep_info["order_coin"] = self.coin_dict[json_data['ch'].split(".")[1].upper()][0]
-            deep_info["base_coin"] = self.coin_dict[json_data['ch'].split(".")[1].upper()][1]
+            order_coin = self.coin_dict[json_data['ch'].split(".")[1].upper()][0]
+            base_coin = self.coin_dict[json_data['ch'].split(".")[1].upper()][1]
             deep_info["forbuy"] = json_data['tick']['bids']
             deep_info["forsell"] = json_data['tick']['asks']
             deep_info["market"] = 0
             deep_info["delay"] = (time_now-deep_info["up_time"])
             #保存到redis
-            k = deep_info["order_coin"]+"-"+deep_info["base_coin"]+"-HUOBI"
+            k = order_coin+"-"+base_coin+"-HUOBI-DEPTH"
             v = json.dumps(deep_info)
             self.redis_db.set(k, v)
             #print("深度延时", time_now-deep_info.up_time)

@@ -103,10 +103,10 @@ class myThread (threading.Thread):
         self.reset_timer()
         json_data = json.loads(str)
         if 'event' not in json_data and json_data['action'] == 'partial':
-            time_now = time.time()*1000#毫秒
-            info = self.info[(json_data['data'][0]['instrument_id'].split("-")[0],json_data['data'][0]['instrument_id'].split("-")[1])]
-            info["order_coin"] = json_data['data'][0]['instrument_id'].split("-")[0]
-            info["base_coin"] = json_data['data'][0]['instrument_id'].split("-")[1]
+            order_coin = json_data['data'][0]['instrument_id'].split("-")[0]
+            base_coin = json_data['data'][0]['instrument_id'].split("-")[1]
+
+            info = self.info[(order_coin,base_coin)]
             info["forbuy"] = numpy.array(json_data['data'][0]['bids'])[:,0:2].tolist()
             info["forsell"] = numpy.array(json_data['data'][0]['asks'])[:,0:2].tolist()
 
@@ -115,19 +115,20 @@ class myThread (threading.Thread):
             info["up_time"] = timeStamp*1000
             info["market"] = 1
             info["delay"] = time_now-timeStamp*1000
-            k = info["order_coin"]+"-"+info["base_coin"]+"-OK"
+            k = order_coin+"-"+base_coin+"-OK-DEPTH"
             v = json.dumps(info)
             self.redis_db.set(k, v)
 
         elif 'event' not in json_data and json_data['action'] == 'update':
-            time_now = time.time()*1000#毫秒
-            info = self.info[(json_data['data'][0]['instrument_id'].split("-")[0],json_data['data'][0]['instrument_id'].split("-")[1])]
+            order_coin = json_data['data'][0]['instrument_id'].split("-")[0]
+            base_coin = json_data['data'][0]['instrument_id'].split("-")[1]
+
+            info = self.info[(order_coin, base_coin)]
             OnChange(info, json_data)
             d = time.strptime(json_data['data'][0]['timestamp'], "%Y-%m-%dT%H:%M:%S.%fZ")
             timeStamp = (time.mktime(d))+8*60*60
             info["up_time"] = timeStamp*1000
-            info["delay"] = time_now-timeStamp*1000
-            k = info["order_coin"]+"-"+info["base_coin"]+"-OK"
+            k = info["order_coin"]+"-"+info["base_coin"]+"-OK-DEPTH"
             v = json.dumps(info)
             self.redis_db.set(k, v)
             
