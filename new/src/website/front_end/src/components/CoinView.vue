@@ -1,223 +1,65 @@
 <template>
   <div >
-    <div class="main">
-      <div>
-        <el-table
-          :data="table_data"
-          height="350"
-          :default-sort = "{prop: 'coin_pair', order: 'ascending'}"
-          >
-          <el-table-column
-            prop="coin_pair"
-            label="交易对"
-            sortable
-            width="140">
-          </el-table-column>
-          <el-table-column
-            prop="huobi_lowest_sell"
-            label="火币最低卖价"
-            sortable
-            width="140">
-          </el-table-column>
-          <el-table-column
-            prop="huobi_highest_buy"
-            label="火币最高买价"
-            sortable
-            width="140">
-          </el-table-column>
-          <el-table-column
-            prop="ok_lowest_sell"
-            label="ok最低卖价"
-            sortable
-            width="140">
-          </el-table-column>
-          <el-table-column
-            prop="ok_highest_buy"
-            label="ok最高买价"
-            sortable
-            width="140">
-          </el-table-column>
-          <el-table-column
-            prop="huobi_buy_profit"
-            label="火币购买价差"
-            sortable
-            width="140">
-            <template slot-scope="scope">
-              <i :class="(table_data[scope.$index].huobi_buy_profit) > 0 ?'el-icon-top green':'el-icon-bottom red'" ></i>
-              <span :class="(table_data[scope.$index].huobi_buy_profit) > 0 ?'green':'red'" style="margin-left: 10px">{{ scope.row.huobi_buy_profit }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column
-            prop="ok_buy_profit"
-            label="ok购买价差"
-            sortable
-            width="140">
-            <template slot-scope="scope">
-              <i :class="(table_data[scope.$index].ok_buy_profit) > 0 ?'el-icon-top green':'el-icon-bottom red'" ></i>
-              <span :class="(table_data[scope.$index].ok_buy_profit) > 0 ?'green':'red'" style="margin-left: 10px">{{ scope.row.ok_buy_profit }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column
-            prop="huobi_delay"
-            label="火币深度延时"
-            sortable
-            width="140">
-          </el-table-column>
-          <el-table-column
-            prop="ok_delay"
-            label="OK深度延时"
-            sortable
-            width="140">
-          </el-table-column>
+    <el-row>
+      <el-col :span="6" style="padding:12px">
+        <div style="background:$color_back2;color:$color_front1;padding:4px;">
+          <span style="color:#ffffff">币种列表</span>
+          <div style="text-align:right;margin-top:-18px"><i class="el-icon-s-tools" style="color:#ffffff;" @click="OnSetCoinList"></i></div>
+          <el-table
+            ref="coin_list_table"
+            :data="coin_list"
+            highlight-current-row
+            style="width: 100%;background:#141826;border:none;margin-top:24px;border-radius:4px"
+            class="customer-table"
+            @current-change="OnCoinListSelectChange"
+            >
+            <el-table-column
+              property="coin_pair"
+              label="交易对"
+              min-width="50%">
+            </el-table-column>
+            <el-table-column
+              property="coin_price"
+              label="价格"
+              min-width="50%">
+            </el-table-column>
+          </el-table>
+        </div>
+      </el-col>
+      <el-col :span="12" style="margin-top:64px;text-align:left;font-size:12px" class="color_front1">
+        <el-row>
+          <el-col :span="4">基础币种&nbsp;&nbsp;{{coin_info.base_coin}}</el-col>
+          <el-col :span="4" :offset="1">交易币种&nbsp;&nbsp;{{coin_info.order_coin}}</el-col>
+          <el-col :span="4" :offset="1">价格精度&nbsp;&nbsp;{{coin_info.price_precision}}</el-col>
+          <el-col :span="4" :offset="1">数量精度&nbsp;&nbsp;{{coin_info.amount_precision}}</el-col>
+          <el-col :span="4" :offset="1">交易区&nbsp;&nbsp;{{coin_info.symbol_partition==1?"主区":"交易区"}}</el-col>
+        </el-row>
 
-        </el-table>
-      </div>
-    </div>
-    <div class="info_dev" style="margin-top:48px">
-        <el-card style="width:30%;">
-          <div>火币差价排行</div>
-          <el-row v-for="n in huobi_top.length" :class="huobi_top[n-1].profit > 0 ? 'green' : 'red'" :key="'huobi_pro_item'+n">
-            <el-col :span="12" style="text-align:left">{{ huobi_top[n-1].coin_pair }}</el-col>
-            <el-col :span="12" style="text-align:right">{{ huobi_top[n-1].profit }}</el-col>
-          </el-row>
-        </el-card>
-
-        <el-card style="width:30%">
-          <div>OK差价排行</div>
-          <el-row v-for="n in ok_top.length" :class="ok_top[n-1].profit > 0 ? 'green' : 'red'" :key="'ok_pro_item'+n">
-            <el-col :span="12" style="text-align:left">{{ ok_top[n-1].coin_pair }}</el-col>
-            <el-col :span="12" style="text-align:right">{{ ok_top[n-1].profit }}</el-col>
-          </el-row>
-        </el-card>
-      <div>bbb</div>
-      <div>ccc</div>
-    </div>
+        <el-row style="margin-top:8px">
+          <el-col :span="4">交易名称&nbsp;&nbsp;{{coin_info.symbol}}</el-col>
+          <el-col :span="4" :offset="1">能否交易&nbsp;&nbsp;{{coin_info.state==0?"不能交易":"能够交易"}}</el-col>
+          <el-col :span="4" :offset="1">交易金额精度&nbsp;&nbsp;{{coin_info.value_precision}}</el-col>
+          <el-col :span="4" :offset="1">最小限价量&nbsp;&nbsp;{{coin_info.limit_order_min_order_amt}}</el-col>
+          <el-col :span="4" :offset="1">最大限价量&nbsp;&nbsp;{{coin_info.limit_order_max_order_amt}}</el-col>
+        </el-row>
+        <el-row style="margin-top:8px">
+          <el-col :span="4">最小市价量&nbsp;&nbsp;{{coin_info.sell_market_min_order_amt}}</el-col>
+          <el-col :span="4" :offset="1">最大市价量&nbsp;&nbsp;{{coin_info.sell_market_max_order_amt}}</el-col>
+          <el-col :span="4" :offset="1">最大买金额&nbsp;&nbsp;{{coin_info.buy_market_max_order_value}}</el-col>
+          <el-col :span="4" :offset="1">最小金额&nbsp;&nbsp;{{coin_info.min_order_value}}</el-col>
+          <el-col :span="4" :offset="1">最大金额&nbsp;&nbsp;{{coin_info.max_order_value}}</el-col>
+        </el-row>
+      </el-col>
+      <el-col :span="6">
+        ccc
+      </el-col>
+    </el-row>
   </div>
 </template>
-
-<script>
-import axios from 'axios'
-export default {
-  name: 'HelloWorld',
-  data () {
-    return {
-      table_data: [{
-        coin_pair: 'BTC-USDT',
-        huobi_lowest_sell: '11.11',
-        huobi_highest_buy: '22.22',
-        ok_lowest_sell: '33.33',
-        ok_highest_buy: '55.55',
-        huobi_buy_profit: '1%',
-        ok_buy_profit: '2%'
-      }, {
-        coin_pair: 'BTC-USDT',
-        huobi_lowest_sell: '11.11',
-        huobi_highest_buy: '22.22',
-        ok_lowest_sell: '33.33',
-        ok_highest_buy: '55.55',
-        huobi_buy_profit: '1%',
-        ok_buy_profit: '2%'
-      }],
-      huobi_top: [{
-        coin_pair: 'aabb',
-        profit: 1
-      }, {
-        coin_pair: 'ccdd',
-        profit: -1
-      }],
-      ok_top: [{
-        coin_pair: 'aabb',
-        profit: 1
-      }, {
-        coin_pair: 'ccdd',
-        profit: -1
-      }]
-    }
-  },
-  mounted: function () {
-    let that = this
-    setInterval(function () {
-      that.Flush()
-    }, 1000)
-  },
-  destroyed: function () {
-
-  },
-  methods: {
-    Flush: function () {
-      var that = this
-      axios.post('/coin_view/overview.php', {
-        method: 'get_overview'
-      }).then(function (response) {
-        var result = response.data
-        that.table_data = []
-        for (let i = 0; i < result.length; i++) {
-          that.table_data.push({
-            coin_pair: result[i].order_coin + '-' + result[i].base_coin,
-            huobi_lowest_sell: result[i].forsell_HUOBI,
-            huobi_highest_buy: result[i].forbuy_HUOBI,
-            ok_lowest_sell: result[i].forsell_OK,
-            ok_highest_buy: result[i].forbuy_OK,
-            huobi_buy_profit: ((result[i].forbuy_HUOBI - result[i].forsell_OK) * 100 / result[i].forbuy_HUOBI).toFixed(2),
-            ok_buy_profit: ((result[i].forbuy_OK - result[i].forsell_HUOBI) * 100 / result[i].forbuy_OK).toFixed(2),
-            huobi_delay: result[i].delay_HUOBI.toFixed(0),
-            ok_delay: result[i].delay_OK.toFixed(0)
-          })
-        }
-        // 计算top10利润
-        that.huobi_top = []
-        that.ok_top = []
-        for (let i = 0; i < that.table_data.length; i++) {
-          that.huobi_top.push({
-            coin_pair: that.table_data[i].coin_pair,
-            profit: that.table_data[i].huobi_buy_profit
-          })
-          that.ok_top.push({
-            coin_pair: that.table_data[i].coin_pair,
-            profit: that.table_data[i].ok_buy_profit
-          })
-        }
-        that.huobi_top.sort(function (a, b) {
-          return b.profit - a.profit
-        })
-        that.huobi_top = that.huobi_top.slice(0, 10)
-
-        that.ok_top.sort(function (a, b) {
-          return b.profit - a.profit
-        })
-        that.ok_top = that.ok_top.slice(0, 10)
-
-      }).catch(function (error) {
-        console.log(error)
-      })
-    }
-  }
-}
-</script>
-
+<script src="../script/CoinView.js"></script>
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style style="scss">
-.main {
-  width:1280px;
-  margin:0 auto;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-}
+<style lang="scss">
+@import '../scss/color.scss';
+@import '../scss/CoinView.scss'
 
-.info_dev{
-  width:1280px;
-  margin:0 auto;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
-
-.green{
-  color: #00aa00;
-}
-
-.red{
-  color: #aa0000;
-}
 </style>

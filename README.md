@@ -35,6 +35,25 @@
 - key:<市场名称>-CONFIG
 - value:[[<交易币种>-<计价币种>], [<交易币种>-<计价币种>]...]
 
+**币种交易规则**
+- key <交易币种>_<基础币种>-<市场名称>-SYMBOL
+- SYMBOL:
+"base-coin"基础币种<br/>
+"order-coin": 交易币种<br/>
+"price-precision": 价格精度<br/>
+"amount-precision": 数量精度<br/>
+"symbol-partition": 交易区 1 主区  2 其他区域<br/>
+"symbol": item["symbol"] 交易名称<br/>
+"state": True能够交易 False不能欧交易<br/>
+"value-precision": 交易金额进度<br/>
+"limit-order-min-order-amt" 交易对限价单最小下单量 ，以基础币种为单位（NEW）<br/>
+"limit-order-max-order-amt" 交易对限价单最大下单量 ，以基础币种为单位（NEW）<br/>
+"sell-market-min-order-amt" 交易对市价卖单最小下单量，以基础币种为单位（NEW）<br/>
+"sell-market-max-order-amt": 交易对市价卖单最大下单量，以基础币种为单位（NEW）<br/>
+"buy-market-max-order-value": i交易对市价买单最大下单金额，以计价币种为单位（NEW）<br/>
+"min-order-value": 交易对限价单和市价买单最小下单金额 ，以计价币种为单位<br/>
+"max-order-value": 交易对限价单和市价买单最大下单金额 ，以折算后的USDT为单位（NEW）<br/>
+}
 **深度行情信息**
 - key:<交易币种>-<计价币种>-<市场名称>-DEPTH
 - value:{<br>

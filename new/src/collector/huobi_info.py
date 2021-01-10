@@ -7,6 +7,7 @@ import websocket
 from config import config
 import sys
 import redis
+from multiprocessing import Process
 
 class myThread (threading.Thread):
     def __init__(self, coin_list):
@@ -107,15 +108,37 @@ def StartCrwal(coin_list):
     thread_ = myThread(coin_list)
     thread_.start()
 
-#python3 depth_huobi.py BTC-USDT,ETH-USDT
-#python3 depth_huobi.py SKM-USDT,SUN-USDT,CKB-USDT,CNNS-USDT,OGO-USDT,ETH-USDT,FTT-USDT,DHT-USDT,VEN-USDT,XMX-USDT,BAL-USDT,ALGO-USDT,LRC-USDT,TNB-USDT,HB10-USDT,LOOM-USDT,BCHA-USDT,GRT-USDT,ELF-USDT,SOL-USDT,NEW-USDT,UTK-USDT,SNX-USDT,LBA-USDT,ACT-USDT,HPT-USDT,CTXC-USDT,OXT-USDT,AVAX-USDT,HC-USDT,VSYS-USDT,DOT-USDT,MXC-USDT,FSN-USDT,YAMV2-USDT,NAS-USDT,XMR-USDT,FIL3S-USDT,BTM-USDT,WXT-USDT,FIL-USDT,FOR-USDT,GLM-USDT,XTZ-USDT,WTC-USDT,LTC3S-USDT,CRE-USDT,HT-USDT,ZRX-USDT,KCASH-USDT,YEE-USDT,SUSHI-USDT,LAMB-USDT,VET-USDT,HOT-USDT,UNI2L-USDT,DAI-USDT,REN-USDT,DOGE-USDT,ANKR-USDT,BCH3L-USDT,NBS-USDT,EKT-USDT,SKL-USDT,SMT-USDT,ELA-USDT,KSM-USDT,ABT-USDT,HIVE-USDT,TITAN-USDT,NEST-USDT,KAVA-USDT,DF-USDT,ETH3L-USDT,BTC3L-USDT,PHA-USDT,EM-USDT,LTC3L-USDT,SWFTC-USDT,PAI-USDT,WICC-USDT,CMT-USDT,VIDY-USDT,ZEC3L-USDT,DCR-USDT,IRIS-USDT,NHBTC-USDT,NKN-USDT,PEARL-USDT,CRV-USDT,OGN-USDT,ADA-USDT,BSV3S-USDT,ATP-USDT,FRONT-USDT,MTA-USDT,STEEM-USDT,HIT-USDT,WAXP-USDT,CVP-USDT,UNI2S-USDT,VALUE-USDT,LOL-USDT,AE-USDT,UNI-USDT,YFII-USDT,JST-USDT,ACH-USDT,OMG-USDT,ICX-USDT,MX-USDT,MKR-USDT,NANO-USDT,UMA-USDT,BNT-USDT,HBC-USDT,RSR-USDT,BCH3S-USDT,CVC-USDT,BSV3L-USDT,DAC-USDT,BTC3S-USDT,WOO-USDT,CHR-USDT,FTI-USDT,XRP3L-USDT,STORJ-USDT,DOT2L-USDT,ITC-USDT,LINK-USDT,EGT-USDT,ZIL-USDT,KNC-USDT,AKRO-USDT,LINK3L-USDT,ETH3S-USDT,GT-USDT,TT-USDT,BAND-USDT,XRP3S-USDT,NEXO-USDT,MCO-USDT,ETH1S-USDT,EOS3S-USDT,EOS-USDT,GNX-USDT,ETC-USDT,POND-USDT,XRT-USDT,WAVES-USDT,SOC-USDT,SNT-USDT,IOST-USDT,API3-USDT,BTC-USDT,ANT-USDT,DOT2S-USDT,EOS3L-USDT,TRB-USDT,SWRV-USDT,FIS-USDT,BTC1S-USDT,GXC-USDT,CHZ-USDT,OCN-USDT,TRX-USDT,AAC-USDT,YFI-USDT,THETA-USDT,CRO-USDT,BLZ-USDT,WNXM-USDT,XLM-USDT,IOTA-USDT,RUFF-USDT,FIL3L-USDT,1INCH-USDT,BETH-USDT,COMP-USDT,BOT-USDT,BHD-USDT,TOP-USDT,PVT-USDT,LUNA-USDT,RING-USDT,SEELE-USDT,ZEC-USDT,NULS-USDT,AST-USDT,ONT-USDT,QTUM-USDT,DTA-USDT,LXT-USDT,DOCK-USDT,UUU-USDT,XEM-USDT,HBAR-USDT,STPT-USDT,FIRO-USDT,BAT-USDT,NEAR-USDT,GOF-USDT,RVN-USDT,SAND-USDT,UIP-USDT,DASH-USDT,BTT-USDT,NSURE-USDT,KAN-USDT,AR-USDT,BIX-USDT,BSV-USDT,ZEC3S-USDT,ONE-USDT,ARPA-USDT,LET-USDT,LEND-USDT,NEO-USDT,AAVE-USDT,ATOM-USDT,XRP-USDT,MDS-USDT,NODE-USDT,MANA-USDT,LINK3S-USDT,LTC-USDT,BCH-USDT,CRU-USDT,DKA-USDT,MLN-USDT,BTS-USDT
-if __name__ == "__main__":
-    arg1 = sys.argv[1]
-    coin_list = []
-    coin_pair_list = arg1.split(",")
-    for item in coin_pair_list:
-        coin_list.append(item.split("-"))
-    print(coin_list)
+def process_func(coin_list):
+    print("process:", coin_list)
     StartCrwal(coin_list)
-    while True:
-        time.sleep(1)
+
+def restart_processes(process_list, coin_list):
+    print("restart process:", coin_list)
+    for item in process_list:
+        item.kill()
+    for i in range(0, len(coin_list), 8):
+        p = Process(target=process_func, args=(coin_list[i: i+8 if i+8 < len(coin_list) else len(coin_list)],))
+        p.start() 
+        process_list.append(p)
+
+
+if __name__ == "__main__":
+    redis_db = redis.Redis(host=config["redis_config"]["host"], port=config["redis_config"]["port"])
+    # 若没设置，初始化只看BTC和ETH
+    if redis_db.get("HUOBI-CONFIG") == None or redis_db.get("OK-CONFIG") == None:
+        redis_db.set("HUOBI-CONFIG", '[["BTC", "USDT"], ["ETH", "USDT"]]')
+        redis_db.set("OK-CONFIG", '["BTC-USDT", "ETH-USDT"]')
+
+    process_list = []
+    coin_list = json.loads(redis_db.get("HUOBI-CONFIG"))
+    restart_processes(process_list, coin_list)
+    
+    print("开始订阅监听币种的信息")
+    ps = redis_db.pubsub()
+    ps.subscribe('HUOBI-CONFIG')  #从liao订阅消息
+    next(ps.listen())
+    for item in ps.listen():		#监听状态：有消息发布了就拿过来
+        print("收到监听信息，重置采集")
+        print(item)
+        coin_list = json.loads(redis_db.get("HUOBI-CONFIG"))
+        restart_processes(process_list, coin_list)

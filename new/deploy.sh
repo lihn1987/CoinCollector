@@ -1,5 +1,5 @@
 #/bin/bash
 cd src/website/front_end
-cnpm install
-cnpm run build
+npm install
+npm run build
 cd ../../../
