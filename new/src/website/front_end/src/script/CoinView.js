@@ -4,6 +4,8 @@ export default {
   data () {
     return {
       coin_list: [],
+      current_base_coin:'',
+      current_order_coin:'',
       coin_info: {
         order_coin:'aaaa',
         price_precision:'',
@@ -19,68 +21,24 @@ export default {
         buy_market_max_order_value:'',
         min_order_value:'',
         max_order_value:'',
-      }
+      },
+      
+      active_right_pan:'first',
+      buy_depth:[["0","0"],["1","0"],["2","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"]],
+      sell_depth:[["0","0"],["1","0"],["2","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"]],
     }
   },
   mounted: function () {
     let that = this
     this.FlushCoinList()
-    setInterval(function () {
-      that.Flush()
-    }, 1000)
+    setInterval(() => {
+      that.FlushDepth();
+    }, 100);
   },
   destroyed: function () {
 
   },
   methods: {
-    Flush: function () {
-      //alert(111)
-      // var that = this
-      /* axios.post('/coin_view/overview.php', {
-        method: 'get_overview'
-      }).then(function (response) {
-        var result = response.data
-        that.table_data = []
-        for (let i = 0; i < result.length; i++) {
-          that.table_data.push({
-            coin_pair: result[i].order_coin + '-' + result[i].base_coin,
-            huobi_lowest_sell: result[i].forsell_HUOBI,
-            huobi_highest_buy: result[i].forbuy_HUOBI,
-            ok_lowest_sell: result[i].forsell_OK,
-            ok_highest_buy: result[i].forbuy_OK,
-            huobi_buy_profit: ((result[i].forbuy_HUOBI - result[i].forsell_OK) * 100 / result[i].forbuy_HUOBI).toFixed(2),
-            ok_buy_profit: ((result[i].forbuy_OK - result[i].forsell_HUOBI) * 100 / result[i].forbuy_OK).toFixed(2),
-            huobi_delay: result[i].delay_HUOBI.toFixed(0),
-            ok_delay: result[i].delay_OK.toFixed(0)
-          })
-        }
-        // 计算top10利润
-        that.huobi_top = []
-        that.ok_top = []
-        for (let i = 0; i < that.table_data.length; i++) {
-          that.huobi_top.push({
-            coin_pair: that.table_data[i].coin_pair,
-            profit: that.table_data[i].huobi_buy_profit
-          })
-          that.ok_top.push({
-            coin_pair: that.table_data[i].coin_pair,
-            profit: that.table_data[i].ok_buy_profit
-          })
-        }
-        that.huobi_top.sort(function (a, b) {
-          return b.profit - a.profit
-        })
-        that.huobi_top = that.huobi_top.slice(0, 10)
-
-        that.ok_top.sort(function (a, b) {
-          return b.profit - a.profit
-        })
-        that.ok_top = that.ok_top.slice(0, 10)
-
-      }).catch(function (error) {
-        console.log(error)
-      }) */
-    },
     FlushCoinList(){
       var that = this;
       axios.get('/coin_view/get_coin_list.php?market=huobi', {
@@ -98,9 +56,32 @@ export default {
         that.coin_list = coin_list;
         that.$nextTick(()=>{
           that.$refs.coin_list_table.setCurrentRow(that.coin_list[0]);
+          
         })
       }).catch(function (error) {
         console.log(error)
+      })
+    },
+    FlushDepth(){
+      var that = this
+      axios.get('/coin_view/get_depth.php?market=huobi&order_coin='+this.current_order_coin+'&base_coin='+this.current_base_coin, {
+        method: 'get_overview'
+      }).then(function (response) {
+        var result = response.data
+        if(result && result["result"] == true){
+          //刷新币种列表
+          for(var i = 0; i < that.buy_depth.length; i++){
+            that.$set(that.buy_depth, i, result.data.forbuy[i]) 
+          }
+          for(var i = 0; i < that.sell_depth.length; i++){
+            that.$set(that.sell_depth, i, result.data.forsell[i]) 
+          }
+        }else{
+          console.log("深度获取失败")
+        }
+
+      }).catch(function (error) {
+        console.log("深度获取异常")
       })
     },
     OnSetCoinList(){
@@ -109,7 +90,7 @@ export default {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
       }).then(({ value }) => {
-        axios.get('/coin_view/set_coin_list.php?market=huobi&coin_list=[["EOS","USDT"],["EOS","ETH"]]', {
+        axios.get('/coin_view/set_coin_list.php?market=huobi&coin_list='+value, {
           method: 'get_overview'
         }).then(function (response) {
           var result = response.data
@@ -135,7 +116,10 @@ export default {
       });
     },
     OnCoinListSelectChange(selection){
+      console.log("OnCoinListSelectChange")
       var coin_pair = selection.coin_pair.split("-");
+      this.current_order_coin = coin_pair[0]
+      this.current_base_coin = coin_pair[1]
       this.FlushSymbol(coin_pair[0], coin_pair[1])
     },
     FlushSymbol(order_coin, base_coin){

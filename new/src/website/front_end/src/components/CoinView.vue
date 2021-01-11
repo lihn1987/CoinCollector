@@ -1,5 +1,5 @@
 <template>
-  <div >
+  <div class="app">
     <el-row>
       <el-col :span="6" style="padding:12px">
         <div style="background:$color_back2;color:$color_front1;padding:4px;">
@@ -50,8 +50,27 @@
           <el-col :span="4" :offset="1">最大金额&nbsp;&nbsp;{{coin_info.max_order_value}}</el-col>
         </el-row>
       </el-col>
-      <el-col :span="6">
-        ccc
+      <el-col :span="6" style="padding-right:24px">
+        <el-tabs v-model="active_right_pan" style="margin-top:48px;border:none;border-radius:4px;padding:12px" class="back2">
+          <el-tab-pane label="盘口" name="first" style="text-align:left;font-size:12px">
+            <el-row>
+              <el-col :span="12">价格</el-col>
+              <el-col :span="12">数量</el-col>
+            </el-row>
+            <el-row class="red" v-for="n in sell_depth.length" :key="'sell'+n">
+              <el-col :span="12">{{sell_depth[buy_depth.length-n][0]}}</el-col>
+              <el-col :span="12">{{sell_depth[buy_depth.length-n][1]}}</el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="24" style="font-size:14px;">当前价格:00.00</el-col>
+            </el-row>
+            <el-row class="green" v-for="n in buy_depth.length" :key="'buy'+n">
+              <el-col :span="12">{{buy_depth[n-1][0]}}</el-col>
+              <el-col :span="12">{{buy_depth[n-1][1]}}</el-col>
+            </el-row>
+          </el-tab-pane>
+          <el-tab-pane label="实时成交" name="second">配置管理</el-tab-pane>
+        </el-tabs>
       </el-col>
     </el-row>
   </div>

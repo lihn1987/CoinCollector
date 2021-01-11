@@ -27,8 +27,25 @@
   border: none;
 }
 
+.el-tabs__item{
+    color:#ffffff;
+}
+.el-tabs__item.is-active {
+    color: #ffffff;
+}
+.el-tabs__item:hover {
+    color: #ffffff;
+    cursor: pointer;
+}
+
 .customer-table::before{
   width: 0;
+}
+
+
+.el-tabs__nav-scroll{
+    background:$color_back3;
+    padding-left:12px;
 }
 
 .green{
@@ -39,6 +56,17 @@
   color: #aa0000;
 }
 
+.back2{
+    background:$color_back2;
+}
+
+.back3{
+    background:$color_back3;
+}
+
+.app{
+    color:$color_front1;
+}
 .color_front1{
   color:$color_front2;
 }
