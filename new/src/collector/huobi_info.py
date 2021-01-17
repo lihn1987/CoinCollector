@@ -135,7 +135,7 @@ if __name__ == "__main__":
     
     print("开始订阅监听币种的信息")
     ps = redis_db.pubsub()
-    ps.subscribe('HUOBI-CONFIG')  #从liao订阅消息
+    ps.subscribe('HUOBI-CONFIG') 
     next(ps.listen())
     for item in ps.listen():		#监听状态：有消息发布了就拿过来
         print("收到监听信息，重置采集")

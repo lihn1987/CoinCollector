@@ -33,7 +33,7 @@ export default {
     this.FlushCoinList()
     setInterval(() => {
       that.FlushDepth();
-    }, 100);
+    }, 1000);
   },
   destroyed: function () {
 
@@ -46,14 +46,17 @@ export default {
       }).then(function (response) {
         var result = response.data
         var coin_list = []
+
         for(var i = 0; i < result.data.length; i++){
           coin_list.push({
             coin_pair: result.data[i][0]+"-"+result.data[i][1],
             coin_price: '000'
           })
         }
-        console.log(result);
+        coin_list = coin_list.sort(function(a,b){return a.coin_pair.localeCompare(b.coin_pair)})
         that.coin_list = coin_list;
+        console.log("coin_list")
+        console.log(that.coin_list)
         that.$nextTick(()=>{
           that.$refs.coin_list_table.setCurrentRow(that.coin_list[0]);
           
@@ -89,6 +92,7 @@ export default {
       this.$prompt('请输入币种列表,例如([["BTC","USDT"],["ETH","USDT"]])', '配置币种', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
+        inputValue:'[["BTC","USDT"],["ETH","USDT"]]'
       }).then(({ value }) => {
         axios.get('/coin_view/set_coin_list.php?market=huobi&coin_list='+value, {
           method: 'get_overview'
@@ -117,10 +121,13 @@ export default {
     },
     OnCoinListSelectChange(selection){
       console.log("OnCoinListSelectChange")
-      var coin_pair = selection.coin_pair.split("-");
-      this.current_order_coin = coin_pair[0]
-      this.current_base_coin = coin_pair[1]
-      this.FlushSymbol(coin_pair[0], coin_pair[1])
+      if(selection != null){
+        console.log(selection)
+        var coin_pair = selection.coin_pair.split("-");
+        this.current_order_coin = coin_pair[0]
+        this.current_base_coin = coin_pair[1]
+        this.FlushSymbol(coin_pair[0], coin_pair[1])
+      }
     },
     FlushSymbol(order_coin, base_coin){
       var that = this;
@@ -129,8 +136,6 @@ export default {
         //console.log(result)
         if(result.result == true){
           that.coin_info = result.data;
-          console.log(that.coin_info)
-          console.log(that.coin_info["order_coin"])
         }
 
       }).catch(function (error) {

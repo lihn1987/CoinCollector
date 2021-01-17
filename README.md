@@ -54,6 +54,16 @@
 "min-order-value": 交易对限价单和市价买单最小下单金额 ，以计价币种为单位<br/>
 "max-order-value": 交易对限价单和市价买单最大下单金额 ，以折算后的USDT为单位（NEW）<br/>
 }
+
+**当前海龟交易法的最优参数**
+- key HAIGUI-<交易币种>-<基础币种>-<市场名称>-<k线类型>SYMBOL
+- SYMBOL:
+"max_profit"预计最大收益<br/>
+"best_buy_width_range": 交易窗口大小<br/>
+"best_buy_point"最佳买点<br/>
+"best_sell_point_low"最佳止损点<br/>
+"best_sell_point_hight"最佳止赢点<br/>
+
 **深度行情信息**
 - key:<交易币种>-<计价币种>-<市场名称>-DEPTH
 - value:{<br>

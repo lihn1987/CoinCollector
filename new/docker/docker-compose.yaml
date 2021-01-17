@@ -12,7 +12,16 @@ services:
         extra_hosts:
             - "api.huobi.pro:104.16.232.188"
             - "real.okex.com:104.19.212.87"
-
+    quantitative_haigui:
+        container_name: quantitative_haigui
+        image: lihn1011/coin_collector:0.4
+        volumes:
+            - ../src/collector/:/data/ 
+        restart: always
+        command: /bin/bash -c "cd /data/; python3 quantitative_haigui.py; while true;do sleep 1 ; done"
+        extra_hosts:
+            - "api.huobi.pro:104.16.232.188"
+            - "real.okex.com:104.19.212.87"
     symbol:
         container_name: symbol
         image: lihn1011/coin_collector:0.4
