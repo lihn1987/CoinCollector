@@ -103,64 +103,70 @@ def Analyse(redis_db, symbol_pair, buy_width_range, buy_point_range, sell_point_
         symbol=symbol_pair[0].lower()+symbol_pair[1].lower()
         kline_type_list = ["1min", "5min", "15min", "30min", "60min", "4hour",]
         for kline_type in kline_type_list:
-            kline_list = GetKline(symbol, kline_type, 2000)
-            max_profit = 0
-            best_buy_point = buy_point_range[0]
-            best_sell_point_range = [sell_point_range[0][0], sell_point_range[1][0]]
-            best_buy_width_range = buy_width_range[0]
-            last_max_profit = 0
-            for i in range(10):
-                # 寻找最优窗口宽度
-                for buy_width in range(buy_width_range[0], buy_width_range[1], 1):
-                    tran_list = GetProfit(kline_list, buy_width, 0.002, best_buy_point, best_sell_point_range)
-                    if len(tran_list):
-                        if tran_list[-1]["account"] > max_profit:
-                            max_profit = tran_list[-1]["account"]
-                            best_buy_width_range = buy_width
+            try:
+                kline_list = GetKline(symbol, kline_type, 2000)
+                max_profit = 0
+                best_buy_point = buy_point_range[0]
+                best_sell_point_range = [sell_point_range[0][0], sell_point_range[1][0]]
+                best_buy_width_range = buy_width_range[0]
+                last_max_profit = 0
+                for i in range(10):
+                    # 寻找最优窗口宽度
+                    for buy_width in range(buy_width_range[0], buy_width_range[1], 1):
+                        tran_list = GetProfit(kline_list, buy_width, 0.002, best_buy_point, best_sell_point_range)
+                        if len(tran_list):
+                            if tran_list[-1]["account"] > max_profit:
+                                max_profit = tran_list[-1]["account"]
+                                best_buy_width_range = buy_width
 
-                # 寻找最优买点
-                for buy_point in np.arange(float(buy_point_range[0]), float(buy_point_range[1]), 0.1):
-                    tran_list = GetProfit(kline_list, best_buy_width_range, 0.002, buy_point, best_sell_point_range)
-                    if len(tran_list):
-                        if tran_list[-1]["account"] > max_profit:
-                            max_profit = tran_list[-1]["account"]
-                            best_buy_point = buy_point
+                    # 寻找最优买点
+                    for buy_point in np.arange(float(buy_point_range[0]), float(buy_point_range[1]), 0.1):
+                        tran_list = GetProfit(kline_list, best_buy_width_range, 0.002, buy_point, best_sell_point_range)
+                        if len(tran_list):
+                            if tran_list[-1]["account"] > max_profit:
+                                max_profit = tran_list[-1]["account"]
+                                best_buy_point = buy_point
 
-                # 寻找最优止损点
-                for sell_point_1 in np.arange(float(sell_point_range[0][0]), float(sell_point_range[0][1]), 0.1):
-                    tran_list = GetProfit(kline_list, best_buy_width_range, 0.002, best_buy_point, [sell_point_1, best_sell_point_range[1]])
-                    if len(tran_list):
-                        if tran_list[-1]["account"] > max_profit:
-                            max_profit = tran_list[-1]["account"]
-                            best_sell_point_range[0] = sell_point_1
+                    # 寻找最优止损点
+                    for sell_point_1 in np.arange(float(sell_point_range[0][0]), float(sell_point_range[0][1]), 0.1):
+                        tran_list = GetProfit(kline_list, best_buy_width_range, 0.002, best_buy_point, [sell_point_1, best_sell_point_range[1]])
+                        if len(tran_list):
+                            if tran_list[-1]["account"] > max_profit:
+                                max_profit = tran_list[-1]["account"]
+                                best_sell_point_range[0] = sell_point_1
 
-                #寻找最优获利点
-                for sell_point_2 in np.arange(float(sell_point_range[1][0]), float(sell_point_range[1][1]), 0.1):
-                    tran_list = GetProfit(kline_list, best_buy_width_range, 0.002, best_buy_point, [best_sell_point_range[0], sell_point_2])
-                    if len(tran_list):
-                        if tran_list[-1]["account"] > max_profit:
-                            max_profit = tran_list[-1]["account"]
-                            best_sell_point_range[1] = sell_point_2
+                    #寻找最优获利点
+                    for sell_point_2 in np.arange(float(sell_point_range[1][0]), float(sell_point_range[1][1]), 0.1):
+                        tran_list = GetProfit(kline_list, best_buy_width_range, 0.002, best_buy_point, [best_sell_point_range[0], sell_point_2])
+                        if len(tran_list):
+                            if tran_list[-1]["account"] > max_profit:
+                                max_profit = tran_list[-1]["account"]
+                                best_sell_point_range[1] = sell_point_2
 
-                if last_max_profit == max_profit:
-                    break
-                last_max_profit = max_profit
-                #print("max_profit:", max_profit)
+                    if last_max_profit == max_profit:
+                        break
+                    last_max_profit = max_profit
+                    #print("max_profit:", max_profit)
 
-            print("==============")
-            print("symbol_pair:", symbol_pair)
-            print("kline_type", kline_type)
-            print("max_profit:", max_profit)
-            print("best_buy_point:", best_buy_point)
-            print("best_sell_point_range:", best_sell_point_range)
-            print("best_buy_width_range:", best_buy_width_range)
+                print("==============")
+                print("symbol_pair:", symbol_pair)
+                print("kline_type", kline_type)
+                print("max_profit:", max_profit)
+                print("best_buy_point:", best_buy_point)
+                print("best_sell_point_range:", best_sell_point_range)
+                print("best_buy_width_range:", best_buy_width_range)
+                print("normal_profit", str((kline_list[-1][1] - kline_list[0][0])/kline_list[0][0]))
 
 
-            redis_db.set("HAIGUI-"+symbol_pair[0]+"-"+symbol_pair[1]+"-HUOBI-"+kline_type+"-"+"max_profit", str(max_profit))
-            redis_db.set("HAIGUI-"+symbol_pair[0]+"-"+symbol_pair[1]+"-HUOBI-"+kline_type+"-"+"best_buy_width_range", str(best_buy_width_range))
-            redis_db.set("HAIGUI-"+symbol_pair[0]+"-"+symbol_pair[1]+"-HUOBI-"+kline_type+"-"+"best_buy_point", str(best_buy_point))
-            redis_db.set("HAIGUI-"+symbol_pair[0]+"-"+symbol_pair[1]+"-HUOBI-"+kline_type+"-"+"best_sell_point_low", str(best_sell_point_range[0]))
-            redis_db.set("HAIGUI-"+symbol_pair[0]+"-"+symbol_pair[1]+"-HUOBI-"+kline_type+"-"+"best_sell_point_hight", str(best_sell_point_range[1]))
+                redis_db.set("HAIGUI-"+symbol_pair[0]+"-"+symbol_pair[1]+"-HUOBI-"+kline_type+"-"+"max_profit", str(max_profit))
+                redis_db.set("HAIGUI-"+symbol_pair[0]+"-"+symbol_pair[1]+"-HUOBI-"+kline_type+"-"+"best_buy_width_range", str(best_buy_width_range))
+                redis_db.set("HAIGUI-"+symbol_pair[0]+"-"+symbol_pair[1]+"-HUOBI-"+kline_type+"-"+"best_buy_point", str(best_buy_point))
+                redis_db.set("HAIGUI-"+symbol_pair[0]+"-"+symbol_pair[1]+"-HUOBI-"+kline_type+"-"+"best_sell_point_low", str(best_sell_point_range[0]))
+                redis_db.set("HAIGUI-"+symbol_pair[0]+"-"+symbol_pair[1]+"-HUOBI-"+kline_type+"-"+"best_sell_point_hight", str(best_sell_point_range[1]))
+                redis_db.set("HAIGUI-"+symbol_pair[0]+"-"+symbol_pair[1]+"-HUOBI-"+kline_type+"-"+"normal_profit", str((kline_list[-1][1] - kline_list[0][0])/kline_list[0][0]))
+            except:
+                # 超时
+                pass
 
 
 
@@ -202,6 +208,6 @@ if __name__ == "__main__":
         coin_list = json.loads(redis_db.get("HUOBI-CONFIG"))
         restart_processes(process_list, coin_list, redis_db)
 
-    
+#ps -ef | grep -v grep | grep quantitative_haigui.py  | awk '{print $2}' | xargs kill -9
 
     

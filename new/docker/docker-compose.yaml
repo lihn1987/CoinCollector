@@ -55,5 +55,15 @@ services:
         ports:
             - "80:80"
             - "443:443"
-
+    trade:
+        container_name: trade
+        image: lihn1011/trade:0.1
+        volumes:
+            - ../src/collector/:/data/ 
+        restart: always
+        command: /bin/bash -c "cd /data/;  while true;do sleep 1 ; done"
+        extra_hosts:
+            - "api.huobi.pro:104.16.232.188"
+            - "real.okex.com:104.19.212.87"
+    
 # 6379    redis port

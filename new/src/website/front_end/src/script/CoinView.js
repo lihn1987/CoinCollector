@@ -22,7 +22,7 @@ export default {
         min_order_value:'',
         max_order_value:'',
       },
-      
+      pre_profit:[],
       active_right_pan:'first',
       buy_depth:[["0","0"],["1","0"],["2","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"]],
       sell_depth:[["0","0"],["1","0"],["2","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"]],
@@ -33,6 +33,7 @@ export default {
     this.FlushCoinList()
     setInterval(() => {
       that.FlushDepth();
+      that.FlushPreProfit()
     }, 1000);
   },
   destroyed: function () {
@@ -87,6 +88,39 @@ export default {
         console.log("深度获取异常")
       })
     },
+    FlushPreProfit(){
+      console.log("FlushPreProfit")
+      var that = this
+      axios.get('/coin_view/get_quantitative_haigui.php?market=huobi&order_coin='+this.current_order_coin+'&base_coin='+this.current_base_coin, {
+        method: 'get_quantitative_haigui'
+      }).then(function (response) {
+        var result = response.data
+        if(result && result["result"] == true){
+          //刷新币种列表
+          console.log(result)
+          that.pre_profit = []
+          for(var key in  result["data"]){
+            console.log(key)
+            result["data"][key]["kline_type"] = key
+            result["data"][key]["max_profit"] = parseFloat(result["data"][key]["max_profit"]).toFixed(2)
+            result["data"][key]["best_buy_point"] = parseFloat(result["data"][key]["best_buy_point"]).toFixed(2)
+            result["data"][key]["best_sell_point_low"] = parseFloat(result["data"][key]["best_sell_point_low"]).toFixed(2)
+            result["data"][key]["best_sell_point_hight"] = parseFloat(result["data"][key]["best_sell_point_hight"]).toFixed(2)
+            result["data"][key]["normal_profit"] = (parseFloat(result["data"][key]["normal_profit"])*100+100).toFixed(2)
+            that.pre_profit.push(
+              result["data"][key]
+            )
+          }
+          console.log(that.pre_profit)
+          
+        }else{
+          console.log("深度获取失败")
+        }
+
+      }).catch(function (error) {
+        console.log("深度获取异常")
+      })
+    },
     OnSetCoinList(){
       var that = this;
       this.$prompt('请输入币种列表,例如([["BTC","USDT"],["ETH","USDT"]])', '配置币种', {
@@ -102,6 +136,7 @@ export default {
             //刷新币种列表
             that.$nextTick(() => {
               that.FlushCoinList()
+              
             })
           }else{
             this.$alert('币种设置失败，请检查格式', '错误', {

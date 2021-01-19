@@ -10,6 +10,7 @@
             :data="coin_list"
             highlight-current-row
             style="width: 100%;background:#141826;border:none;margin-top:24px;border-radius:4px"
+            height="560"
             class="customer-table"
             @current-change="OnCoinListSelectChange"
             >
@@ -48,6 +49,42 @@
           <el-col :span="4" :offset="1">最大买金额&nbsp;&nbsp;{{coin_info.buy_market_max_order_value}}</el-col>
           <el-col :span="4" :offset="1">最小金额&nbsp;&nbsp;{{coin_info.min_order_value}}</el-col>
           <el-col :span="4" :offset="1">最大金额&nbsp;&nbsp;{{coin_info.max_order_value}}</el-col>
+        </el-row>
+        <el-row style="margin-top:16px;">
+          <el-table
+            :data="pre_profit"
+            style="width: 100%">
+            <el-table-column
+              prop="kline_type"
+              label="k线类型"
+              width="60">
+            </el-table-column>
+            <el-table-column
+              prop="max_profit"
+              label="最大收益"
+              width="180">
+            </el-table-column>
+            <el-table-column
+              prop="best_buy_width_range"
+              label="窗口宽度">
+            </el-table-column>
+            <el-table-column
+              prop="best_buy_point"
+              label="最佳买点">
+            </el-table-column>
+            <el-table-column
+              prop="best_sell_point_low"
+              label="最佳止损点">
+            </el-table-column>
+            <el-table-column
+              prop="best_sell_point_hight"
+              label="最佳止盈点">
+            </el-table-column>
+            <el-table-column
+              prop="normal_profit"
+              label="无操作收益">
+            </el-table-column>
+          </el-table>
         </el-row>
       </el-col>
       <el-col :span="6" style="padding-right:24px">
