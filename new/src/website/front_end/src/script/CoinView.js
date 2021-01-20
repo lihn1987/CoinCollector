@@ -3,10 +3,10 @@ export default {
   name: 'HelloWorld',
   data () {
     return {
-      coin_list: [],
-      current_base_coin:'',
-      current_order_coin:'',
-      coin_info: {
+      coin_list: [],                    //币种列表
+      current_base_coin:'',             //当前展示的基础币种
+      current_order_coin:'',            //当前展示的交易币种
+      coin_info: {                      //当前币种信息
         order_coin:'aaaa',
         price_precision:'',
         amount_precision:'',
@@ -22,6 +22,7 @@ export default {
         min_order_value:'',
         max_order_value:'',
       },
+      now_balance:0,                  //当前币种持仓
       pre_profit:[],
       active_right_pan:'first',
       buy_depth:[["0","0"],["1","0"],["2","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"],["0","0"]],
@@ -34,12 +35,25 @@ export default {
     setInterval(() => {
       that.FlushDepth();
       that.FlushPreProfit()
+      that.FlushCurrentBalance()
     }, 1000);
   },
   destroyed: function () {
 
   },
   methods: {
+    FlushCurrentBalance(){
+      var that = this;
+      console.log("FlushCurrentBalance")
+      axios.get('/coin_view/get_balance.php?market=huobi&coin='+this.current_order_coin, {
+      }).then(function (response) {
+        var result = response.data
+        console.log(result)
+        that.now_balance = result["data"]
+      }).catch(function (error) {
+        console.log(error)
+      })
+    },
     FlushCoinList(){
       var that = this;
       axios.get('/coin_view/get_coin_list.php?market=huobi', {
@@ -56,8 +70,6 @@ export default {
         }
         coin_list = coin_list.sort(function(a,b){return a.coin_pair.localeCompare(b.coin_pair)})
         that.coin_list = coin_list;
-        console.log("coin_list")
-        console.log(that.coin_list)
         that.$nextTick(()=>{
           that.$refs.coin_list_table.setCurrentRow(that.coin_list[0]);
           
@@ -89,7 +101,6 @@ export default {
       })
     },
     FlushPreProfit(){
-      console.log("FlushPreProfit")
       var that = this
       axios.get('/coin_view/get_quantitative_haigui.php?market=huobi&order_coin='+this.current_order_coin+'&base_coin='+this.current_base_coin, {
         method: 'get_quantitative_haigui'
@@ -97,10 +108,8 @@ export default {
         var result = response.data
         if(result && result["result"] == true){
           //刷新币种列表
-          console.log(result)
           that.pre_profit = []
           for(var key in  result["data"]){
-            console.log(key)
             result["data"][key]["kline_type"] = key
             result["data"][key]["max_profit"] = parseFloat(result["data"][key]["max_profit"]).toFixed(2)
             result["data"][key]["best_buy_point"] = parseFloat(result["data"][key]["best_buy_point"]).toFixed(2)
@@ -111,7 +120,6 @@ export default {
               result["data"][key]
             )
           }
-          console.log(that.pre_profit)
           
         }else{
           console.log("深度获取失败")
@@ -157,7 +165,6 @@ export default {
     OnCoinListSelectChange(selection){
       console.log("OnCoinListSelectChange")
       if(selection != null){
-        console.log(selection)
         var coin_pair = selection.coin_pair.split("-");
         this.current_order_coin = coin_pair[0]
         this.current_base_coin = coin_pair[1]

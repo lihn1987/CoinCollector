@@ -86,7 +86,9 @@
             </el-table-column>
           </el-table>
         </el-row>
+        <el-row>当前持仓{{now_balance}}</el-row>
       </el-col>
+      
       <el-col :span="6" style="padding-right:24px">
         <el-tabs v-model="active_right_pan" style="margin-top:48px;border:none;border-radius:4px;padding:12px" class="back2">
           <el-tab-pane label="盘口" name="first" style="text-align:left;font-size:12px">
