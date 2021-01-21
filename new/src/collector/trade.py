@@ -1,4 +1,5 @@
 from huobi.client.account import AccountClient
+from huobi.client.trade import TradeClient
 from huobi.constant import *
 from huobi.utils import *
 import redis
@@ -9,6 +10,7 @@ account_client = AccountClient(api_key=key.ak,
                               secret_key=key.sk)
 
 if __name__ == "__main__":
+    """
     #首先获取要监控的账户
     redis_db = redis.Redis(host=config["redis_config"]["host"], port=config["redis_config"]["port"])
     # 若没设置，初始化只看BTC和ETH
@@ -33,3 +35,15 @@ if __name__ == "__main__":
                 print("error")
 
         time.sleep(1)
+    """
+    trade_client = TradeClient(api_key=key.ak,
+                              secret_key=key.sk)
+    order_id = trade_client.create_order(
+        symbol="btc3lusdt", #btc+3
+        account_id=213490, 
+        client_order_id=1234567,
+        amount=100, 
+        order_type=OrderType.BUY_MARKET,
+        price=0,
+        source="spot-api")
+    print(order_id)

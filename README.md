@@ -63,7 +63,7 @@
 "best_buy_point"最佳买点<br/>
 "best_sell_point_low"最佳止损点<br/>
 "best_sell_point_hight"最佳止赢点<br/>
-
+"normal_profit" 无量化盈亏
 **深度行情信息**
 - key:<交易币种>-<计价币种>-<市场名称>-DEPTH
 - value:{<br>
@@ -71,7 +71,9 @@
 "forbuy" 买盘数据[[<价格>,<数量>],...]</br>
 "forsell" 卖盘数据[[<价格>,<数量>],...]</br>
 }
-
+**账户信息**
+- key:<币种>-<市场名称>-BALANCE
+- value:持仓
 
 
 
