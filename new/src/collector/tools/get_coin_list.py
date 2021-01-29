@@ -5,7 +5,7 @@ headers = {'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/2010
 request = urllib.request.Request(url = 'https://api.huobi.pro/market/tickers', headers = headers)
 response = urllib.request.urlopen(request)
 json_obj = json.loads(response.read().decode('utf-8'))
-
+print("普通交易")
 # 筛选usdt，btc结尾的币种
 all_items = []
 eth_price = 0.0
@@ -45,4 +45,9 @@ for item in coin_list:
 
 print(len(format_list))
 print(format_list)
-    
+
+print("合约")
+request = urllib.request.Request(url = 'https://api.hbdm.com/linear-swap-api/v1/swap_contract_info', headers = headers)
+response = urllib.request.urlopen(request)
+json_obj = json.loads(response.read().decode('utf-8'))
+print(json_obj)

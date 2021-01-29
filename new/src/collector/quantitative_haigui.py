@@ -5,19 +5,35 @@ import numpy as np
 import redis
 from config import config
 from multiprocessing import Process
-
-def GetKline(symbol,period, size):
-
+import time
+#kill -9 $(ps -ef|grep quantitativ|grep -v grep|awk '{print $2}')
+def GetKline(redis_db, symbol, period, size):
+    print(symbol)
     headers = {'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0'}
     request = urllib.request.Request(url = 'https://api.huobi.pro/market/history/kline?symbol=%s&period=%s&size=%d'%(symbol, period, size), headers = headers)
     response = urllib.request.urlopen(request, timeout=15)
     kline_str = response.read().decode('utf-8')
+    
     json_obj = json.loads(kline_str)
         
     rtn_obj = []
     try:
         for item in json_obj["data"]:
             rtn_obj.append([item["high"], item["low"]])
+        # 将k线数值写入
+        order_coin = ""
+        base_coin = ""
+        if symbol.endswith("usdt"):
+            order_coin = symbol[:-len("usdt")].upper()
+            base_coin = symbol[-len("usdt"):].upper()
+        elif symbol.endswith("btc"):
+            order_coin = symbol[:-len("btc")].upper()
+            base_coin = symbol[-len("btc"):].upper()
+        elif symbol.endswith("eth"):
+            order_coin = symbol[:-len("eth")].upper()
+            base_coin = symbol[-len("eth"):].upper()
+        if order_coin != "" and base_coin != "":
+            redis_db.set("%s-%s-%s-HUOBI"%(order_coin, base_coin, period), kline_str)
     except:
         print((symbol, period, size))
         print(kline_str)
@@ -97,76 +113,76 @@ def GetProfit(kline_list, buy_width, fee, buy_point, sell_point):
     return tran_list
 
 # 一直进行分析
-def Analyse(redis_db, symbol_pair, buy_width_range, buy_point_range, sell_point_range):
+def Analyse(redis_db, symbol_pair, buy_width_range, buy_point_range, sell_point_range, kline_type):
     while True:
         print("Analyse:",symbol_pair)
         symbol=symbol_pair[0].lower()+symbol_pair[1].lower()
-        kline_type_list = ["1min", "5min", "15min", "30min", "60min", "4hour",]
-        for kline_type in kline_type_list:
-            try:
-                kline_list = GetKline(symbol, kline_type, 2000)
-                max_profit = 0
-                best_buy_point = buy_point_range[0]
-                best_sell_point_range = [sell_point_range[0][0], sell_point_range[1][0]]
-                best_buy_width_range = buy_width_range[0]
-                last_max_profit = 0
-                for i in range(10):
-                    # 寻找最优窗口宽度
-                    for buy_width in range(buy_width_range[0], buy_width_range[1], 1):
-                        tran_list = GetProfit(kline_list, buy_width, 0.002, best_buy_point, best_sell_point_range)
-                        if len(tran_list):
-                            if tran_list[-1]["account"] > max_profit:
-                                max_profit = tran_list[-1]["account"]
-                                best_buy_width_range = buy_width
+        
+        try:
+            kline_list = GetKline(redis_db, symbol, kline_type, 2000)
+            max_profit = 0
+            best_buy_point = buy_point_range[0]
+            best_sell_point_range = [sell_point_range[0][0], sell_point_range[1][0]]
+            best_buy_width_range = buy_width_range[0]
+            last_max_profit = 0
+            for i in range(10):
+                # 寻找最优窗口宽度
+                for buy_width in range(buy_width_range[0], buy_width_range[1], 1):
+                    tran_list = GetProfit(kline_list, buy_width, 0.002, best_buy_point, best_sell_point_range)
+                    if len(tran_list):
+                        if tran_list[-1]["account"] > max_profit:
+                            max_profit = tran_list[-1]["account"]
+                            best_buy_width_range = buy_width
 
-                    # 寻找最优买点
-                    for buy_point in np.arange(float(buy_point_range[0]), float(buy_point_range[1]), 0.1):
-                        tran_list = GetProfit(kline_list, best_buy_width_range, 0.002, buy_point, best_sell_point_range)
-                        if len(tran_list):
-                            if tran_list[-1]["account"] > max_profit:
-                                max_profit = tran_list[-1]["account"]
-                                best_buy_point = buy_point
+                # 寻找最优买点
+                for buy_point in np.arange(float(buy_point_range[0]), float(buy_point_range[1]), 0.1):
+                    tran_list = GetProfit(kline_list, best_buy_width_range, 0.002, buy_point, best_sell_point_range)
+                    if len(tran_list):
+                        if tran_list[-1]["account"] > max_profit:
+                            max_profit = tran_list[-1]["account"]
+                            best_buy_point = buy_point
 
-                    # 寻找最优止损点
-                    for sell_point_1 in np.arange(float(sell_point_range[0][0]), float(sell_point_range[0][1]), 0.1):
-                        tran_list = GetProfit(kline_list, best_buy_width_range, 0.002, best_buy_point, [sell_point_1, best_sell_point_range[1]])
-                        if len(tran_list):
-                            if tran_list[-1]["account"] > max_profit:
-                                max_profit = tran_list[-1]["account"]
-                                best_sell_point_range[0] = sell_point_1
+                # 寻找最优止损点
+                for sell_point_1 in np.arange(float(sell_point_range[0][0]), float(sell_point_range[0][1]), 0.1):
+                    tran_list = GetProfit(kline_list, best_buy_width_range, 0.002, best_buy_point, [sell_point_1, best_sell_point_range[1]])
+                    if len(tran_list):
+                        if tran_list[-1]["account"] > max_profit:
+                            max_profit = tran_list[-1]["account"]
+                            best_sell_point_range[0] = sell_point_1
 
-                    #寻找最优获利点
-                    for sell_point_2 in np.arange(float(sell_point_range[1][0]), float(sell_point_range[1][1]), 0.1):
-                        tran_list = GetProfit(kline_list, best_buy_width_range, 0.002, best_buy_point, [best_sell_point_range[0], sell_point_2])
-                        if len(tran_list):
-                            if tran_list[-1]["account"] > max_profit:
-                                max_profit = tran_list[-1]["account"]
-                                best_sell_point_range[1] = sell_point_2
+                #寻找最优获利点
+                for sell_point_2 in np.arange(float(sell_point_range[1][0]), float(sell_point_range[1][1]), 0.1):
+                    tran_list = GetProfit(kline_list, best_buy_width_range, 0.002, best_buy_point, [best_sell_point_range[0], sell_point_2])
+                    if len(tran_list):
+                        if tran_list[-1]["account"] > max_profit:
+                            max_profit = tran_list[-1]["account"]
+                            best_sell_point_range[1] = sell_point_2
 
-                    if last_max_profit == max_profit:
-                        break
-                    last_max_profit = max_profit
-                    #print("max_profit:", max_profit)
+                if last_max_profit == max_profit:
+                    break
+                last_max_profit = max_profit
+                #print("max_profit:", max_profit)
 
-                print("==============")
-                print("symbol_pair:", symbol_pair)
-                print("kline_type", kline_type)
-                print("max_profit:", max_profit)
-                print("best_buy_point:", best_buy_point)
-                print("best_sell_point_range:", best_sell_point_range)
-                print("best_buy_width_range:", best_buy_width_range)
-                print("normal_profit", str((kline_list[-1][1] - kline_list[0][0])/kline_list[0][0]))
+            print("==============")
+            print("symbol_pair:", symbol_pair)
+            print("kline_type", kline_type)
+            print("max_profit:", max_profit)
+            print("best_buy_point:", best_buy_point)
+            print("best_sell_point_range:", best_sell_point_range)
+            print("best_buy_width_range:", best_buy_width_range)
+            print("normal_profit", str((kline_list[-1][1] - kline_list[0][0])/kline_list[0][0]))
 
 
-                redis_db.set("HAIGUI-"+symbol_pair[0]+"-"+symbol_pair[1]+"-HUOBI-"+kline_type+"-"+"max_profit", str(max_profit))
-                redis_db.set("HAIGUI-"+symbol_pair[0]+"-"+symbol_pair[1]+"-HUOBI-"+kline_type+"-"+"best_buy_width_range", str(best_buy_width_range))
-                redis_db.set("HAIGUI-"+symbol_pair[0]+"-"+symbol_pair[1]+"-HUOBI-"+kline_type+"-"+"best_buy_point", str(best_buy_point))
-                redis_db.set("HAIGUI-"+symbol_pair[0]+"-"+symbol_pair[1]+"-HUOBI-"+kline_type+"-"+"best_sell_point_low", str(best_sell_point_range[0]))
-                redis_db.set("HAIGUI-"+symbol_pair[0]+"-"+symbol_pair[1]+"-HUOBI-"+kline_type+"-"+"best_sell_point_hight", str(best_sell_point_range[1]))
-                redis_db.set("HAIGUI-"+symbol_pair[0]+"-"+symbol_pair[1]+"-HUOBI-"+kline_type+"-"+"normal_profit", str((kline_list[-1][1] - kline_list[0][0])/kline_list[0][0]))
-            except:
-                # 超时
-                pass
+            redis_db.set("HAIGUI-"+symbol_pair[0]+"-"+symbol_pair[1]+"-HUOBI-"+kline_type+"-"+"max_profit", str(max_profit))
+            redis_db.set("HAIGUI-"+symbol_pair[0]+"-"+symbol_pair[1]+"-HUOBI-"+kline_type+"-"+"best_buy_width_range", str(best_buy_width_range))
+            redis_db.set("HAIGUI-"+symbol_pair[0]+"-"+symbol_pair[1]+"-HUOBI-"+kline_type+"-"+"best_buy_point", str(best_buy_point))
+            redis_db.set("HAIGUI-"+symbol_pair[0]+"-"+symbol_pair[1]+"-HUOBI-"+kline_type+"-"+"best_sell_point_low", str(best_sell_point_range[0]))
+            redis_db.set("HAIGUI-"+symbol_pair[0]+"-"+symbol_pair[1]+"-HUOBI-"+kline_type+"-"+"best_sell_point_hight", str(best_sell_point_range[1]))
+            redis_db.set("HAIGUI-"+symbol_pair[0]+"-"+symbol_pair[1]+"-HUOBI-"+kline_type+"-"+"normal_profit", str((kline_list[-1][1] - kline_list[0][0])/kline_list[0][0]))
+            time.sleep(1)
+        except:
+            # 超时
+            pass
 
 
 
@@ -182,9 +198,11 @@ def restart_processes(process_list, coin_list, redis_db):
     #     p.start() 
     #     process_list.append(p)
     for item in coin_list:
-        p = Process(target=Analyse, args=(redis_db, item, [5, 50], [0.1, 10], [[1,10], [1, 20]]))
-        p.start() 
-        process_list.append(p)
+        kline_type_list = ["1min", "5min", "15min", "30min", "60min", "4hour",]
+        for kline_type in kline_type_list:
+            p = Process(target=Analyse, args=(redis_db, item, [5, 50], [0.1, 10], [[1,10], [1, 20]], kline_type))
+            p.start() 
+            process_list.append(p)
 
 if __name__ == "__main__":
     redis_db = redis.Redis(host=config["redis_config"]["host"], port=config["redis_config"]["port"])
