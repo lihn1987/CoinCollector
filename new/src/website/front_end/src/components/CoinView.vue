@@ -86,7 +86,50 @@
             </el-table-column>
           </el-table>
         </el-row>
-        <el-row>当前持仓{{now_balance}}</el-row>
+        <el-row>
+          <!-- "order_coin"=>$order_coin, "base_coin"=>$base_coin, "is_buy"=>$is_buy, "amount"=>$amount, "price"=>$price -->
+          <div>当前正在进行的交易</div>
+          <el-table
+            :data="transaction_now"
+            style="width: 100%">
+            <el-table-column
+              prop="order_coin"
+              label="交易币种"
+              sortable
+              width="120">
+            </el-table-column>
+            <el-table-column
+              prop="base_coin"
+              label="基础币种"
+              width="120">
+            </el-table-column>
+            <el-table-column
+              prop="is_buy"
+              label="买卖方向"
+              width="80">
+            </el-table-column>
+            <el-table-column
+              prop="amount"
+              label="当前持仓"
+              width="120">
+            </el-table-column>
+            <el-table-column
+              prop="profit"
+              label="当前波段利润"
+              width="180">
+            </el-table-column>
+            <el-table-column
+              prop="price"
+              label="持仓价格"
+              width="120">
+            </el-table-column>
+            <el-table-column
+              prop="all"
+              label="USDT价格"
+              width="auto">
+            </el-table-column>
+          </el-table>
+        </el-row>
       </el-col>
       
       <el-col :span="6" style="padding-right:24px">

@@ -76,7 +76,7 @@ def IsUnBuyTime(kline_list, low_price_margin, high_price_margin):
     buy_point 买点涨幅
     sell_point [止损卖点,止盈卖点]
 """
-def GetProfit(kline_list, buy_width, fee, buy_point, sell_point):
+def GetProfit(symbol_pair, kline_list, buy_width, fee, buy_point, sell_point):
     tran_list = []
     is_buy = False
     org_money = 100
@@ -128,7 +128,7 @@ def Analyse(redis_db, symbol_pair, buy_width_range, buy_point_range, sell_point_
             for i in range(10):
                 # 寻找最优窗口宽度
                 for buy_width in range(buy_width_range[0], buy_width_range[1], 1):
-                    tran_list = GetProfit(kline_list, buy_width, 0.002, best_buy_point, best_sell_point_range)
+                    tran_list = GetProfit(symbol_pair, kline_list, buy_width, 0.002, best_buy_point, best_sell_point_range)
                     if len(tran_list):
                         if tran_list[-1]["account"] > max_profit:
                             max_profit = tran_list[-1]["account"]
@@ -136,7 +136,7 @@ def Analyse(redis_db, symbol_pair, buy_width_range, buy_point_range, sell_point_
 
                 # 寻找最优买点
                 for buy_point in np.arange(float(buy_point_range[0]), float(buy_point_range[1]), 0.1):
-                    tran_list = GetProfit(kline_list, best_buy_width_range, 0.002, buy_point, best_sell_point_range)
+                    tran_list = GetProfit(symbol_pair, kline_list, best_buy_width_range, 0.002, buy_point, best_sell_point_range)
                     if len(tran_list):
                         if tran_list[-1]["account"] > max_profit:
                             max_profit = tran_list[-1]["account"]
@@ -144,7 +144,7 @@ def Analyse(redis_db, symbol_pair, buy_width_range, buy_point_range, sell_point_
 
                 # 寻找最优止损点
                 for sell_point_1 in np.arange(float(sell_point_range[0][0]), float(sell_point_range[0][1]), 0.1):
-                    tran_list = GetProfit(kline_list, best_buy_width_range, 0.002, best_buy_point, [sell_point_1, best_sell_point_range[1]])
+                    tran_list = GetProfit(symbol_pair, kline_list, best_buy_width_range, 0.002, best_buy_point, [sell_point_1, best_sell_point_range[1]])
                     if len(tran_list):
                         if tran_list[-1]["account"] > max_profit:
                             max_profit = tran_list[-1]["account"]
@@ -152,7 +152,7 @@ def Analyse(redis_db, symbol_pair, buy_width_range, buy_point_range, sell_point_
 
                 #寻找最优获利点
                 for sell_point_2 in np.arange(float(sell_point_range[1][0]), float(sell_point_range[1][1]), 0.1):
-                    tran_list = GetProfit(kline_list, best_buy_width_range, 0.002, best_buy_point, [best_sell_point_range[0], sell_point_2])
+                    tran_list = GetProfit(symbol_pair,kline_list, best_buy_width_range, 0.002, best_buy_point, [best_sell_point_range[0], sell_point_2])
                     if len(tran_list):
                         if tran_list[-1]["account"] > max_profit:
                             max_profit = tran_list[-1]["account"]
@@ -198,7 +198,7 @@ def restart_processes(process_list, coin_list, redis_db):
     #     p.start() 
     #     process_list.append(p)
     for item in coin_list:
-        kline_type_list = ["1min", "5min", "15min", "30min", "60min", "4hour",]
+        kline_type_list = ["1min"]
         for kline_type in kline_type_list:
             p = Process(target=Analyse, args=(redis_db, item, [5, 50], [0.1, 10], [[1,10], [1, 20]], kline_type))
             p.start() 
@@ -210,7 +210,6 @@ if __name__ == "__main__":
     if redis_db.get("HUOBI-CONFIG") == None or redis_db.get("OK-CONFIG") == None:
         redis_db.set("HUOBI-CONFIG", '[["BTC", "USDT"], ["ETH", "USDT"]]')
         redis_db.set("OK-CONFIG", '["BTC-USDT", "ETH-USDT"]')
-
     process_list = []
     coin_list = json.loads(redis_db.get("HUOBI-CONFIG"))
     print(coin_list)
@@ -227,5 +226,4 @@ if __name__ == "__main__":
         restart_processes(process_list, coin_list, redis_db)
 
 #ps -ef | grep -v grep | grep quantitative_haigui.py  | awk '{print $2}' | xargs kill -9
-
-    
+#[["BTC3S","USDT"],["BTC3L","USDT"],["ETH3S","USDT"],["ETH3L","USDT"],["LINK3S","USDT"],["LINK3L","USDT"], ["ALGO", "USDT"]]

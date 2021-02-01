@@ -22,6 +22,7 @@ export default {
         min_order_value:'',
         max_order_value:'',
       },
+      transaction_now:[],
       now_balance:0,                  //当前币种持仓
       pre_profit:[],
       active_right_pan:'first',
@@ -35,7 +36,8 @@ export default {
     setInterval(() => {
       that.FlushDepth();
       that.FlushPreProfit()
-      that.FlushCurrentBalance()
+      that.FlushCurrentBalance(),
+      that.FlushTransactionNow()
     }, 1000);
   },
   destroyed: function () {
@@ -50,6 +52,17 @@ export default {
         var result = response.data
         console.log(result)
         that.now_balance = result["data"]
+      }).catch(function (error) {
+        console.log(error)
+      })
+    },FlushTransactionNow(){
+      var that = this;
+      console.log("FlushTransactionNow")
+      axios.get('/coin_view/get_trade_haigui.php', {
+      }).then(function (response) {
+        var result = response.data
+        console.log(result)
+        that.transaction_now = result["data"]
       }).catch(function (error) {
         console.log(error)
       })
