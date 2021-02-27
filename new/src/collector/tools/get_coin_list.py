@@ -36,7 +36,7 @@ all_items.sort(key=takeSatistic)
 coin_list = []
 #1000000000
 for item in all_items:
-    if item["amount"] > 1000000  and (item["ask"] - item["bid"])/item["bid"] < 0.01:
+    if item["amount"] > 100000  and (item["ask"] - item["bid"])/item["bid"] < 0.02:
         coin_list.append(item)
 
 format_list = []

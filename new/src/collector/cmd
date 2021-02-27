@@ -1,0 +1,28 @@
+1 ETH         python3 huobi_contract.py --cmd=clear --coin=ETH --key=main; python3 huobi_contract.py --cmd=start --coin=ETH --key=main;
+2 DOGE        python3 huobi_contract.py --cmd=clear --coin=DOGE --key=main; python3 huobi_contract.py --cmd=start --coin=DOGE --key=main;
+3 XRP         python3 huobi_contract.py --cmd=clear --coin=XRP --key=main; python3 huobi_contract.py --cmd=start --coin=XRP --key=main;
+4 ZEC         python3 huobi_contract.py --cmd=clear --coin=ZEC --key=main; python3 huobi_contract.py --cmd=start --coin=ZEC --key=main;
+5 ALGO        python3 huobi_contract.py --cmd=clear --coin=ALGO --key=main; python3 huobi_contract.py --cmd=start --coin=ALGO --key=main;
+6 LINK        python3 huobi_contract.py --cmd=clear --coin=LINK --key=main; python3 huobi_contract.py --cmd=start --coin=LINK --key=main;
+7 DOT         python3 huobi_contract.py --cmd=clear --coin=DOT --key=main; python3 huobi_contract.py --cmd=start --coin=DOT --key=main;
+8 SNX         python3 huobi_contract.py --cmd=clear --coin=SNX --key=main; python3 huobi_contract.py --cmd=start --coin=SNX --key=main;
+9 NEO         python3 huobi_contract.py --cmd=clear --coin=NEO --key=main; python3 huobi_contract.py --cmd=start --coin=NEO --key=main;
+
+
+
+
+1 DOGE        python3 huobi_contract1.py --cmd=clear --coin=DOGE --key=main; python3 huobi_contract1.py --cmd=start --coin=DOGE --key=main;
+2 XRP         python3 huobi_contract1.py --cmd=clear --coin=XRP --key=main; python3 huobi_contract1.py --cmd=start --coin=XRP --key=main;
+3 ZEC         python3 huobi_contract1.py --cmd=clear --coin=ZEC --key=main; python3 huobi_contract1.py --cmd=start --coin=ZEC --key=main;
+4 ALGO        python3 huobi_contract1.py --cmd=clear --coin=ALGO --key=main; python3 huobi_contract1.py --cmd=start --coin=ALGO --key=main;
+5 LINK        python3 huobi_contract1.py --cmd=clear --coin=LINK --key=main; python3 huobi_contract1.py --cmd=start --coin=LINK --key=main;
+6 DOT         python3 huobi_contract1.py --cmd=clear --coin=DOT --key=main; python3 huobi_contract1.py --cmd=start --coin=DOT --key=main;
+
+
+7 DOGE        python3 huobi_contract1.py --cmd=clear --coin=DOGE --key=sub; python3 huobi_contract1.py --cmd=start --coin=DOGE --key=sub;
+8 XRP         python3 huobi_contract1.py --cmd=clear --coin=XRP --key=sub; python3 huobi_contract1.py --cmd=start --coin=XRP --key=sub;
+9 ZEC         python3 huobi_contract1.py --cmd=clear --coin=ZEC --key=sub; python3 huobi_contract1.py --cmd=start --coin=ZEC --key=sub;
+10 ALGO       python3 huobi_contract1.py --cmd=clear --coin=ALGO --key=sub; python3 huobi_contract1.py --cmd=start --coin=ALGO --key=sub;
+11 LINK       python3 huobi_contract1.py --cmd=clear --coin=LINK --key=sub; python3 huobi_contract1.py --cmd=start --coin=LINK --key=sub;
+12 DOT        python3 huobi_contract1.py --cmd=clear --coin=DOT --key=sub; python3 huobi_contract1.py --cmd=start --coin=DOT --key=sub;
+

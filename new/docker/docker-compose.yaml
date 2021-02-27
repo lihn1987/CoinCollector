@@ -1,38 +1,5 @@
 version: '3'
-
-
 services:
-    coin_collector:
-        container_name: coin_collector
-        image: lihn1011/coin_collector:0.4
-        volumes:
-            - ../src/collector/:/data/ 
-        restart: always
-        command: /bin/bash -c "cd /data/; python3 huobi_info.py; while true;do sleep 1 ; done"
-        extra_hosts:
-            - "api.huobi.pro:104.16.232.188"
-            - "real.okex.com:104.19.212.87"
-    quantitative_haigui:
-        container_name: quantitative_haigui
-        image: lihn1011/coin_collector:0.4
-        volumes:
-            - ../src/collector/:/data/ 
-        restart: always
-        command: /bin/bash -c "cd /data/; python3 quantitative_haigui.py; while true;do sleep 1 ; done"
-        extra_hosts:
-            - "api.huobi.pro:104.16.232.188"
-            - "real.okex.com:104.19.212.87"
-    symbol:
-        container_name: symbol
-        image: lihn1011/coin_collector:0.4
-        volumes:
-            - ../src/collector/:/data/ 
-        restart: always
-        command: /bin/bash -c "cd /data/; python3 symbol_main.py; while true;do sleep 1 ; done"
-        extra_hosts:
-            - "api.huobi.pro:104.16.232.188"
-            - "real.okex.com:104.19.212.87"
-
     redis:
         container_name: redis
         image: lihn1011/redis:0.1
@@ -42,7 +9,8 @@ services:
 
         restart: always
         ports:
-          - "6379:6379"
+            - "6379:6379"
+
     nginx:
         container_name: nginx
         image: lihn1011/nginx:0.4
@@ -55,6 +23,7 @@ services:
         ports:
             - "80:80"
             - "443:443"
+
     trade:
         container_name: trade
         image: lihn1011/trade:0.1
@@ -65,5 +34,34 @@ services:
         extra_hosts:
             - "api.huobi.pro:104.16.232.188"
             - "real.okex.com:104.19.212.87"
-    
-# 6379    redis port
+            - "api.hbdm.com:104.17.33.9"
+        depends_on: 
+            - redis
+
+    mysql:
+        container_name: mysql
+        image: lihn1011/mysql:0.2
+        volumes:
+            - ./volumes/mysql/:/var/lib/mysql/
+
+        restart: always
+        command: mysqld --sql-mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION'
+        expose:
+            - 3306
+        ports:
+            - "6688:3306"
+
+    history_scanner:
+        container_name: history_scanner
+        image: lihn1011/trade:0.1
+        volumes:
+            - ../src/collector/:/data/ 
+        restart: always
+        command: /bin/bash -c "cd /data/;  while true;do sleep 1 ; done"
+        extra_hosts:
+            - "api.huobi.pro:104.16.232.188"
+            - "real.okex.com:104.19.212.87"
+            - "api.hbdm.com:104.17.33.9"
+        depends_on: 
+            - redis
+            - mysql

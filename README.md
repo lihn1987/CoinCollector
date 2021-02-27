@@ -55,6 +55,7 @@
 "max-order-value": 交易对限价单和市价买单最大下单金额 ，以折算后的USDT为单位（NEW）<br/>
 }
 
+
 **当前海龟交易法的最优参数**
 - key HAIGUI-<交易币种>-<基础币种>-<市场名称>-<k线类型>SYMBOL
 - SYMBOL:
@@ -74,6 +75,15 @@
 **账户信息**
 - key:<币种>-<市场名称>-BALANCE
 - value:持仓
+**当前K线**
+- key:<交易币种>-<基础币种>-<k线类型>-<市场名称>
+- value: k线的json字符串
 
-
-
+**深度币种交易规则**
+- key <交易币种>_<基础币种>-HUOBI_CONTRACT-SYMBOL
+- SYMBOL:
+"base-coin"
+"order-coin"
+"contract_code"
+"contract_size"
+"price_tick"

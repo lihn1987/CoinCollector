@@ -49,7 +49,8 @@ const devWebpackConfig = merge(baseWebpackConfig, {
         secure: false,
         changeOrigin:true  
       },
-    }
+    },
+    disableHostCheck: true
   },
   plugins: [
     new webpack.DefinePlugin({
