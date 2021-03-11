@@ -133,11 +133,13 @@ def UpdateNow(key, tag, coin_name,):
         print(e)
 
 if __name__ == "__main__":
-    main_coin = ["ETH", "DOGE", "XRP", "ZEC", "ALGO", "LINK","DOT","SNX","NEO"]
-    sub1_coin = ["ETH", "DOGE", "XRP", "ZEC", "ALGO", "LINK","DOT","SNX","NEO"]
+    main_coin = ["DOGE", "XRP", "ZEC", "ALGO", "LINK","DOT"]
+    sub1_coin = ["DOGE", "XRP", "ZEC", "ALGO", "LINK","DOT"]
     while True:
         for coin_item in main_coin:
             #买入平空
+            UpdateHistory(key_main.key, "huobi_1", coin_item, 1)
+            UpdateHistory(key_main.key, "huobi_1", coin_item, 2)
             UpdateHistory(key_main.key, "huobi_1", coin_item, 3)
             UpdateHistory(key_main.key, "huobi_1", coin_item, 4)
             UpdateNow(key_main.key, "huobi_1", coin_item)
@@ -145,6 +147,8 @@ if __name__ == "__main__":
 
         for coin_item in sub1_coin:
             #买入平空
+            UpdateHistory(key_sub1.key, "huobi_2", coin_item, 1)
+            UpdateHistory(key_sub1.key, "huobi_2", coin_item, 2)
             UpdateHistory(key_sub1.key, "huobi_2", coin_item, 3)
             UpdateHistory(key_sub1.key, "huobi_2", coin_item, 4)
             UpdateNow(key_sub1.key, "huobi_2", coin_item)

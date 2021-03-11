@@ -1,254 +1,10 @@
 <template>
   <div class="app" style = "min-width:1280px">
     <el-card>
-      <el-tabs v-model="main_tb_index">
-        <!--
-        <el-tab-pane label="火币主账户" name="1" style="text-align:center">
+      <el-tabs v-model="main_tb_index" @tab-click="FlushECharts(2)">
+        <el-tab-pane v-for="n in 2" :label="config[n-1].lbl" v-bind:key= "n" :name="config[n-1].name" style="text-align:center">
           <el-card style="width:1280px;margin:0 auto;margin-top:24px">
-            <el-row>已实现利润</el-row>
-            <el-table
-              :data="huobi_main"
-              style="width: 1260px;margin:24px auto"
-              >
-              <el-table-column
-                prop="coin_name"
-                label="币种"
-                sortable
-                width="180">
-              </el-table-column>
-              <el-table-column
-                prop="latest_time"
-                label="上次量化时间差"
-                sortable
-                width="180">
-              </el-table-column>
-              <el-table-column
-                prop="amount"
-                label="当日总交易量"
-                sortable
-                width="180">
-              </el-table-column>
-              <el-table-column
-                prop="profit"
-                label="当日总收益"
-                sortable
-                width="180">
-                <template slot-scope="scope">
-                  <div class="clearfix">
-                    <div :class="scope.row.profit == 0?'tb_normal':(scope.row.profit > 0? 'tb_up':'tb_down')+' left'">{{ scope.row.profit }}</div>
-                    <div :class="scope.row.profit == 0?'tb_normal':(scope.row.profit > 0? 'tb_up el-icon-top ':'tb_down el-icon-bottom')+' left'"></div>
-                  </div>
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="profit_buy"
-                label="当日平多收益"
-                sortable
-                width="180">
-                <template slot-scope="scope">
-                  <div class="clearfix">
-                    <div :class="(scope.row.profit_buy == 0?'tb_normal':(scope.row.profit_buy > 0? 'tb_up':'tb_down')+' left')">{{ scope.row.profit_buy }}</div>
-                    <div :class="scope.row.profit_buy == 0?'tb_normal':(scope.row.profit_buy > 0? 'tb_up el-icon-top ':'tb_down el-icon-bottom')+' left'"></div>
-                  </div>
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="profit_sell"
-                label="当日平空收益"
-                sortable
-                width="180">
-                <template slot-scope="scope">
-                  <div :class="(scope.row.profit_sell == 0?'tb_normal':(scope.row.profit_sell > 0? 'tb_up':'tb_down')+' left')">{{ scope.row.profit_sell }}</div>
-                  <div :class="scope.row.profit_sell == 0?'tb_normal':(scope.row.profit_sell > 0? 'tb_up el-icon-top ':'tb_down el-icon-bottom')+' left'"></div>
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="count"
-                label="当日交易次数"
-                sortable
-                width="180">
-              </el-table-column>
-            </el-table>
-            <el-row>
-              <el-col :span="8">总利润:{{huobi_main_profit_sum}}</el-col>
-              <el-col :span="8">总交易量:{{huobi_main_amount_sum}}</el-col>
-              <el-col :span="8">总波段数{{huobi_main_count_sum}}</el-col>
-            </el-row>
-          </el-card>
-          <el-card style="width:1280px;margin:0 auto;margin-top:24px">
-            <el-row>未完成交易</el-row>
-            <el-table
-              :data="huobi_main_now"
-              style="width: 900px;margin:24px auto"
-              >
-              <el-table-column
-                prop="coin_order"
-                label="币种"
-                sortable
-                width="180">
-              </el-table-column>
-              <el-table-column
-                prop="dir"
-                label="方向"
-                sortable
-                width="180">
-              </el-table-column>
-              <el-table-column
-                prop="profit"
-                label="利润"
-                sortable
-                width="180">
-                <template slot-scope="scope">
-                  <div :class="scope.row.profit == 0?'tb_normal':(scope.row.profit > 0? 'tb_up left':'tb_down left')">{{ scope.row.profit }}</div>
-                  <div :class="scope.row.profit == 0?'tb_normal':(scope.row.profit > 0? 'tb_up el-icon-top ':'tb_down el-icon-bottom')+' left'"></div>
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="profit_rate"
-                label="利润率"
-                sortable
-                width="180">
-                <template slot-scope="scope">
-                  <div :class="scope.row.profit_rate == 0?'tb_normal':(scope.row.profit_rate > 0? 'tb_up left':'tb_down left')">{{ scope.row.profit_rate }}%</div>
-                  <div :class="scope.row.profit_rate == 0?'tb_normal':(scope.row.profit_rate > 0? 'tb_up el-icon-top ':'tb_down el-icon-bottom')+' left'"></div>
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="position_margin"
-                label="抵押资产"
-                sortable
-                width="180">
-              </el-table-column>
-            </el-table>
-            <el-row>
-              <el-col :span="8">总利润:{{huobi_main_now_profit_sum}}</el-col>
-              <el-col :span="8">抵押量:{{huobi_main_now_amount_sum}}</el-col>
-            </el-row>
-          </el-card>
-        </el-tab-pane>
-        <el-tab-pane label="火币子账户1" name="2">
-          <el-card style="width:1280px;margin:0 auto;margin-top:24px">
-            <el-row>已完成交易</el-row>
-            <el-table
-              :data="huobi_sub1"
-              style="width: 1260px;margin:24px auto"
-              >
-              <el-table-column
-                prop="coin_name"
-                label="币种"
-                sortable
-                width="180">
-              </el-table-column>
-              <el-table-column
-                prop="latest_time"
-                label="上次量化时间差"
-                sortable
-                width="180">
-              </el-table-column>
-              <el-table-column
-                prop="amount"
-                label="当日总交易量"
-                sortable
-                width="180">
-              </el-table-column>
-              <el-table-column
-                prop="profit"
-                label="当日总收益"
-                sortable
-                width="180">
-                <template slot-scope="scope">
-                  <div :class="scope.row.profit == 0?'tb_normal':(scope.row.profit > 0? 'tb_up left':'tb_down left')">{{ scope.row.profit }}</div>
-                  <div :class="scope.row.profit == 0?'tb_normal':(scope.row.profit > 0? 'tb_up el-icon-top ':'tb_down el-icon-bottom')+' left'"></div>
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="profit_buy"
-                label="当日平多收益"
-                sortable
-                width="180">
-                <template slot-scope="scope">
-                  <div :class="scope.row.profit_buy == 0?'tb_normal':(scope.row.profit_buy > 0? 'tb_up left':'tb_down left')">{{ scope.row.profit_buy }}</div>
-                  <div :class="scope.row.profit_buy == 0?'tb_normal':(scope.row.profit_buy > 0? 'tb_up el-icon-top ':'tb_down el-icon-bottom')+' left'"></div>
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="profit_sell"
-                label="当日平空收益"
-                sortable
-                width="180">
-                <template slot-scope="scope">
-                  <div :class="scope.row.profit_sell == 0?'tb_normal':(scope.row.profit_sell > 0? 'tb_up left':'tb_down left')">{{ scope.row.profit_sell }}</div>
-                  <div :class="scope.row.profit_sell == 0?'tb_normal':(scope.row.profit_sell > 0? 'tb_up el-icon-top ':'tb_down el-icon-bottom')+' left'"></div>
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="count"
-                label="当日交易次数"
-                sortable
-                width="180">
-              </el-table-column>
-            </el-table>
-            <el-row>
-              <el-col :span="8">总利润:{{huobi_sub1_profit_sum}}</el-col>
-              <el-col :span="8">总交易量:{{huobi_sub1_amount_sum}}</el-col>
-              <el-col :span="8">总波段数{{huobi_sub1_count_sum}}</el-col>
-            </el-row>
-          </el-card>
-          <el-card style="width:1280px;margin:0 auto;margin-top:24px">
-            <el-row>未完成交易</el-row>
-            <el-table
-              :data="huobi_sub1_now"
-              style="width: 900px;margin:24px auto"
-              >
-              <el-table-column
-                prop="coin_order"
-                label="币种"
-                sortable
-                width="180">
-              </el-table-column>
-              <el-table-column
-                prop="dir"
-                label="方向"
-                sortable
-                width="180">
-              </el-table-column>
-              <el-table-column
-                prop="profit"
-                label="利润"
-                sortable
-                width="180">
-                <template slot-scope="scope">
-                  <div :class="scope.row.profit == 0?'tb_normal':(scope.row.profit > 0? 'tb_up left':'tb_down left')">{{ scope.row.profit }}</div>
-                  <div :class="scope.row.profit == 0?'tb_normal':(scope.row.profit > 0? 'tb_up el-icon-top ':'tb_down el-icon-bottom')+' left'"></div>
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="profit_rate"
-                label="利润率"
-                sortable
-                width="180">
-                <template slot-scope="scope">
-                  <div :class="scope.row.profit_rate == 0?'tb_normal':(scope.row.profit_rate > 0? 'tb_up left':'tb_down left')">{{ scope.row.profit_rate }}%</div>
-                  <div :class="scope.row.profit_rate == 0?'tb_normal':(scope.row.profit_rate > 0? 'tb_up el-icon-top ':'tb_down el-icon-bottom')+' left'"></div>
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="position_margin"
-                label="抵押资产"
-                sortable
-                width="180">
-              </el-table-column>
-            </el-table>
-            <el-row>
-              <el-col :span="8">总利润:{{huobi_sub1_now_profit_sum}}</el-col>
-              <el-col :span="8">抵押量:{{huobi_sub1_now_amount_sum}}</el-col>
-            </el-row>
-          </el-card>
-        </el-tab-pane>
-        -->
-        <el-tab-pane v-for="n in 2" label="火币主账户" v-bind:key= "n" :name="config[n-1].name" style="text-align:center">
-          <el-card style="width:1280px;margin:0 auto;margin-top:24px">
-            <el-row>已实现利润</el-row>
+            <el-row>当日已实现利润</el-row>
             <el-table
               :data="config[n-1].profit_history.detail"
               style="width: 1260px;margin:24px auto"
@@ -257,25 +13,31 @@
                 prop="coin_name"
                 label="币种"
                 sortable
-                width="180">
+                width="auto">
+              </el-table-column>
+              <el-table-column
+                prop="status"
+                label="当前状态"
+                sortable
+                width="120">
               </el-table-column>
               <el-table-column
                 prop="latest_time"
                 label="上次量化时间差"
                 sortable
-                width="180">
+                width="150">
               </el-table-column>
               <el-table-column
                 prop="amount"
-                label="当日总交易量"
+                label="总交易量"
                 sortable
-                width="180">
+                width="110">
               </el-table-column>
               <el-table-column
                 prop="profit"
-                label="当日总收益"
+                label="总收益"
                 sortable
-                width="180">
+                width="100">
                 <template slot-scope="scope">
                   <div class="clearfix">
                     <div :class="scope.row.profit == 0?'tb_normal':(scope.row.profit > 0? 'tb_up':'tb_down')+' left'">{{ scope.row.profit }}</div>
@@ -285,9 +47,9 @@
               </el-table-column>
               <el-table-column
                 prop="profit_buy"
-                label="当日平多收益"
+                label="平空收益"
                 sortable
-                width="180">
+                width="110">
                 <template slot-scope="scope">
                   <div class="clearfix">
                     <div :class="(scope.row.profit_buy == 0?'tb_normal':(scope.row.profit_buy > 0? 'tb_up':'tb_down')+' left')">{{ scope.row.profit_buy }}</div>
@@ -297,9 +59,9 @@
               </el-table-column>
               <el-table-column
                 prop="profit_sell"
-                label="当日平空收益"
+                label="平多收益"
                 sortable
-                width="180">
+                width="110">
                 <template slot-scope="scope">
                   <div :class="(scope.row.profit_sell == 0?'tb_normal':(scope.row.profit_sell > 0? 'tb_up':'tb_down')+' left')">{{ scope.row.profit_sell }}</div>
                   <div :class="scope.row.profit_sell == 0?'tb_normal':(scope.row.profit_sell > 0? 'tb_up el-icon-top ':'tb_down el-icon-bottom')+' left'"></div>
@@ -307,9 +69,21 @@
               </el-table-column>
               <el-table-column
                 prop="count"
-                label="当日交易次数"
+                label="交易次数"
                 sortable
-                width="180">
+                width="110">
+              </el-table-column>
+              <el-table-column
+                label="操作"
+                sortable
+                width="260">
+                <template slot-scope="scope">
+                  <div class="clearfix">
+                    <el-button type="primary" @click="OnStop(scope.row.coin_name, n)">停止</el-button>
+                    <el-button type="primary" @click="OnLiquidation(scope.row.coin_name, n)">平仓</el-button>
+                    <el-button type="primary" @click="OnReset(scope.row.coin_name, n)">重启</el-button>
+                  </div>
+                </template>
               </el-table-column>
             </el-table>
             <el-row>
@@ -416,6 +190,49 @@
               layout="prev, pager, next, jumper"
               :total="history[n-1].page_size">
             </el-pagination>
+          </el-card>
+
+          <el-card style="width:1280px;margin:0 auto;margin-top:24px">
+            <el-row>历史统计</el-row>
+            <el-row style="margin-top:36px">
+              <el-col :span="8">
+                <div class="grid-content">
+                  <span class="demonstration">起始时间</span>
+                  <el-date-picker
+                    v-model="config[n-1].statistic.start_time"
+                    type="date"
+                    value-format='timestamp'
+                    @change = "FlushECharts(n)"
+                    placeholder="选择日期">
+                  </el-date-picker>
+                </div>
+              </el-col>
+              <el-col :span="8">
+                <div class="grid-content">
+                  <span>币种</span>
+                  <el-select v-model="config[n-1].statistic.statistic_coin" @change = "FlushECharts(n)" placeholder="请选择">
+                    <el-option key="ALL" label="所有币种" value="ALL"></el-option>
+                    <el-option key="XRP" label="XRP" value="XRP"></el-option>
+                    <el-option key="DOGE" label="DOGE" value="DOGE"></el-option>
+                    <el-option key="DOT" label="DOT" value="DOT"></el-option>
+                    <el-option key="ALGO" label="ALGO" value="ALGO"></el-option>
+                    <el-option key="LINK" label="LINK" value="LINK"></el-option>
+                    <el-option key="ZEC" label="ZEC" value="ZEC"></el-option>
+                  </el-select>
+                </div>
+              </el-col>
+              <el-col :span="8">
+                <div class="grid-content">
+                  <span>统计类型</span>
+                  <el-select v-model="config[n-1].statistic.statistic_type" @change = "FlushECharts(n)" placeholder="请选择">
+                    <el-option key="1" label="收益" value="1"></el-option>
+                    <el-option key="2" label="交易额" value="2"></el-option>
+                    <el-option key="3" label="交易次数" value="3"></el-option>
+                  </el-select>
+                </div>
+              </el-col>
+            </el-row>
+            <div :id = "'echart'+n" style="width:100%;height:500px"></div>
           </el-card>
         </el-tab-pane>
       </el-tabs>

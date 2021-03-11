@@ -20,17 +20,17 @@ import logging
 import os.path
 import io
 redis_db = redis.Redis(host=config["redis_config"]["host"], port=config["redis_config"]["port"])
-plan_index = 1 #高风险
-plan_index = 2 #低风险
-
+#plan_index = 1 #高风险
+#plan_index = 2 #低风险
+plan_index = None
 
 key = None
 #1 1.5 2.5 5
 #0  2   4  8
 #amount = 0
 #simulate
-simu = True
-sim_kline = eth_usdt_kline.kline_list
+simu = False
+sim_kline = None
 
 DIR_NONE = 0
 DIR_BUY = 1
@@ -65,19 +65,25 @@ def GetPrefixLog():
     return "%s-%s %s"%(order_coin, base_coin, datetime.datetime.now())
 
 def WatchDog():
-    redis_db.set("%s-%s-%d-latest_time"%(order_coin, plan_index, base_coin), time.time())
+    redis_db.set("%s-%s-%d-latest_time"%(order_coin, base_coin, plan_index), time.time())
 
 def GetKline(period, size):
-    while True:
-        try:
-            headers = {'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0'}
-            request = urllib.request.Request(url = 'https://api.hbdm.com/linear-swap-ex/market/history/kline?contract_code=%s-%s&period=%s&size=%d'%(order_coin, base_coin, period, size), headers = headers)
-            response = urllib.request.urlopen(request, timeout=5)
-            json_obj = json.loads(response.read().decode('utf-8'))
-            return json_obj["data"]
-        except Exception as e:
-            print("huobi symbol error:", e)
-            pass
+    global sim_kline
+    if simu and size==1:
+        return sim_kline
+    else:
+        while True:
+            try:
+                headers = {'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0'}
+                request = urllib.request.Request(url = 'https://api.hbdm.com/linear-swap-ex/market/history/kline?contract_code=%s-%s&period=%s&size=%d'%(order_coin, base_coin, period, size), headers = headers)
+                response = urllib.request.urlopen(request, timeout=5)
+                json_obj = json.loads(response.read().decode('utf-8'))
+                if len(json_obj["data"]) == 0:
+                    continue
+                return json_obj["data"]
+            except Exception as e:
+                print("huobi symbol error:", e)
+                pass
         
 def GetPriceNow():
     item = GetKline("1min", 1)[0]
@@ -241,15 +247,38 @@ def IsMaker():
         return (False, result)
 
 def SyncMaker():
-    ClearMaker()
-    Maker()
-    redis_db.set("%s-%s-maker_list"%(order_coin,base_coin), json.dumps(maker_list))
+    if not simu:
+        ClearMaker()
+        Maker()
+        redis_db.set("%s-%s-maker_list"%(order_coin,base_coin), json.dumps(maker_list))
+    else:
+        print("开始挂单>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+        for item in maker_list:
+            if trade_dir == DIR_NONE:
+                offset = "open"
+            elif trade_dir == DIR_BUY:
+                if item[0] == DIR_BUY:
+                    offset = "open"
+                elif item[0] == DIR_SELL:
+                    offset = "close"
+            elif trade_dir == DIR_SELL:
+                if item[0] == DIR_BUY:
+                    offset = "close"
+                elif item[0] == DIR_SELL:
+                    offset = "open"
+                    
+
+            print("订单类型:", offset)
+            print("方向:", "买" if item[0] == DIR_BUY else "卖")
+            print("价格:", item[1])
+            print("数量:", item[2])
+            print("======================================")
 
 def StartMaker(price):
     global maker_list
     if plan_index == 1:#较低风险
-        maker_list = [[DIR_BUY, price*0.985, GetCountPersent(price, DIR_BUY)[0], 0], [DIR_SELL, price*1.015, GetCountPersent(price, DIR_SELL)[0],0]]
-    else plan_index == 2:#高风险
+        maker_list = [[DIR_BUY, price*0.97, GetCountPersent(price, DIR_BUY)[0], 0], [DIR_SELL, price*1.03, GetCountPersent(price, DIR_SELL)[0],0]]
+    elif plan_index == 2:#高风险
         maker_list = [[DIR_BUY, price*0.97, GetCountPersent(price, DIR_BUY)[0], 0], [DIR_SELL, price*1.03, GetCountPersent(price, DIR_SELL)[0],0]]
     SyncAmount(maker_list, [],[])
     SyncMaker()
@@ -530,7 +559,7 @@ class Logger(object):
 
 import getopt
 def ProcessArg():
-    global order_coin, base_coin, persent_list, step_list, usdt_account,contract_size, price_point, key
+    global order_coin, base_coin, persent_list, step_list, usdt_account,contract_size, price_point, key, plan_index
     cmd = None
     coin_name = None
     argv = sys.argv[1:]
@@ -552,11 +581,65 @@ def ProcessArg():
             key = arg
     if key == "main":
         key = key_main.key
+        plan_index = 1
     elif key == "sub":
         key = key_sub1.key
+        plan_index = 2
     else:
         print("unknown key")
     if cmd == "start":
+        persent_list = [1, 1.5, 2.5, 5]
+        tep_list = [0, 0.045, 0.108, 0.157]
+        base_coin = "USDT"
+        coin_list = {
+            "DOGE":{
+                "usdt_account": 300,
+                "contract_size": 100,
+                "price_point": 5
+            },
+            "XRP":{
+                "usdt_account": 300,
+                "contract_size": 10,
+                "price_point": 4
+            },
+            "ETH":{
+                "usdt_account": 300,
+                "contract_size": 0.01,
+                "price_point": 2
+            },
+            "ZEC":{
+                "usdt_account": 300,
+                "contract_size": 0.1,
+                "price_point": 2
+            },
+            "ALGO":{
+                "usdt_account": 300,
+                "contract_size": 10,
+                "price_point": 4
+            },
+            "LINK":{
+                "usdt_account": 300,
+                "contract_size": 0.1,
+                "price_point": 4
+            },
+            "DOT":{
+                "usdt_account": 300,
+                "contract_size": 1,
+                "price_point": 4
+            },
+            "SNX":{
+                "usdt_account": 300,
+                "contract_size": 1,
+                "price_point": 4
+            },
+            "NEO":{
+                "usdt_account": 300,
+                "contract_size": 0.1,
+                "price_point": 3
+            }
+        }
+
+        """
         if coin_name == "DOGE":
             order_coin = coin_name
             base_coin = "USDT"
@@ -566,78 +649,13 @@ def ProcessArg():
             contract_size = 100
             price_point = 5
             print("开始交易%s-%s"%(order_coin, base_coin))
-        elif coin_name == "XRP":
+        """
+        if coin_name in coin_list:
             order_coin = coin_name
             base_coin = "USDT"
-            persent_list = [1, 1.5, 2.5, 5]
-            step_list = [0, 0.045, 0.10, 0.3]
-            usdt_account = 250
-            contract_size = 10
-            price_point = 4
-            print("开始交易%s-%s"%(order_coin, base_coin))
-        elif coin_name == "ETH":
-            order_coin = coin_name
-            base_coin = "USDT"
-            persent_list = [1, 1.5, 2.5, 5]
-            step_list = [0, 0.045, 0.10, 0.3]
-            usdt_account = 250
-            contract_size = 0.01
-            price_point = 2
-            print("开始交易%s-%s"%(order_coin, base_coin))
-        elif coin_name == "ZEC":
-            order_coin = coin_name
-            base_coin = "USDT"
-            persent_list = [1, 1.5, 2.5, 5]
-            step_list = [0, 0.045, 0.10, 0.3]
-            usdt_account = 200
-            contract_size = 0.1
-            price_point = 2
-            print("开始交易%s-%s"%(order_coin, base_coin))
-        elif coin_name == "ALGO":
-            order_coin = coin_name
-            base_coin = "USDT"
-            persent_list = [1, 1.5, 2.5, 5]
-            step_list = [0, 0.045, 0.10, 0.3]
-            usdt_account = 300
-            contract_size = 10
-            price_point = 4
-            print("开始交易%s-%s"%(order_coin, base_coin))
-        elif coin_name == "LINK":
-            order_coin = coin_name
-            base_coin = "USDT"
-            persent_list = [1, 1.5, 2.5, 5]
-            step_list = [0, 0.045, 0.10, 0.3]
-            usdt_account = 250
-            contract_size = 0.1
-            price_point = 4
-            print("开始交易%s-%s"%(order_coin, base_coin))
-        elif coin_name == "DOT":
-            order_coin = coin_name
-            base_coin = "USDT"
-            persent_list = [1, 1.5, 2.5, 5]
-            step_list = [0, 0.045, 0.10, 0.3]
-            usdt_account = 300
-            contract_size = 1
-            price_point = 4
-            print("开始交易%s-%s"%(order_coin, base_coin))
-        elif coin_name == "SNX":
-            order_coin = coin_name
-            base_coin = "USDT"
-            persent_list = [1, 1.5, 2.5, 5]
-            step_list = [0, 0.045, 0.10, 0.3]
-            usdt_account = 250
-            contract_size = 1
-            price_point = 4
-            print("开始交易%s-%s"%(order_coin, base_coin))
-        elif coin_name == "NEO":
-            order_coin = coin_name
-            base_coin = "USDT"
-            persent_list = [1, 1.5, 2.5, 5]
-            step_list = [0, 0.045, 0.10, 0.3]
-            usdt_account = 250
-            contract_size = 0.1
-            price_point = 3
-            print("开始交易%s-%s"%(order_coin, base_coin))
+            usdt_account = coin_list[coin_name]["usdt_account"]
+            contract_size = coin_list[coin_name]["contract_size"]
+            price_point = coin_list[coin_name]["price_point"]
         else:
             print("无法识别的币种")
             exit(1)
@@ -657,9 +675,14 @@ def ProcessArg():
         exit(1)
 
 if __name__ == "__main__":
+    
     ProcessArg()
-    #IsMaker()
-    #exit(0)
+    if simu:
+        print("开始获取模拟k线")
+        sim_kline = GetKline("1min", 20)
+        print(sim_kline)
+        
+
     #初始化日志
     sys.stdout = Logger("%s-%s"%(order_coin, base_coin) + '.log', path='')
     print(create_detail_day().center(60, '*'))
@@ -680,6 +703,7 @@ if __name__ == "__main__":
             step += 1
             redis_db.set("%s-%s-step"%(order_coin, base_coin), step)
             SaveEnv()
+#            exit(1)
         if step == 1:
             WaitMaker()
             step += 1

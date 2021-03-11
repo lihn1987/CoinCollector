@@ -54,7 +54,8 @@ trade_history
 where 
 `timestamp`>$time
 and tag = 'huobi_1'
-group by coin_order,dir";
+group by coin_order,dir
+order by coin_order";
 $result = $conn->query($sql);
  
 if ($result->num_rows > 0) {
