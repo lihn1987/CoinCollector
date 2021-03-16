@@ -4,7 +4,11 @@
       <el-tabs v-model="main_tb_index" @tab-click="FlushECharts(2)">
         <el-tab-pane v-for="n in 2" :label="config[n-1].lbl" v-bind:key= "n" :name="config[n-1].name" style="text-align:center">
           <el-card style="width:1280px;margin:0 auto;margin-top:24px">
-            <el-row>当日已实现利润</el-row>
+            <el-row style="display: -webkit-flex;display:flex;flex-direction: row;justify-content:space-between">
+              <div></div>
+              <div>当日已实现利润</div>
+              <div style="font-size:12px;line-height:24px">当前账户资产估值({{config[n-1].amount_balance}}usdt)</div>
+            </el-row>
             <el-table
               :data="config[n-1].profit_history.detail"
               style="width: 1260px;margin:24px auto"

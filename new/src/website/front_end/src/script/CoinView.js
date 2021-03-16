@@ -8,7 +8,8 @@ export default {
       main_tb_index:"1",
       config:[{
           name:"1",
-          lbl:"火币主账户",
+          lbl:"火币账户1",
+          amount_balance:0,
           profit_history:{
             detail:[],
             amount_sum:0,
@@ -28,7 +29,8 @@ export default {
           }
         },{
           name:"2",
-          lbl:"火币子账户",
+          lbl:"火币账户2",
+          amount_balance:0,
           profit_history:{
             detail:[],
             amount_sum:0,
@@ -69,10 +71,12 @@ export default {
     this.FlushProfit()
     this.FlushProfitNow()
     that.FlushHistory()
+    that.FlushAmountBalance()
     setInterval(() => {
       that.FlushProfit()
       that.FlushProfitNow()
       that.FlushHistory()
+      that.FlushAmountBalance()
     }, 5000);
   },
   destroyed: function () {
@@ -84,6 +88,12 @@ export default {
       this.config[1].statistic.start_time = Date.parse(new Date())-1000*60*60*24*7;
       this.FlushECharts(1)
       this.FlushECharts(2)
+    },
+    FlushAmountBalance(){
+      axios.post("/coin_view/get_balance_now.php").then(function(result){
+        _this.config[0].amount_balance = result.data.data[0]
+        _this.config[1].amount_balance = result.data.data[1]
+      })
     },
     //刷新今天收益统计
     FlushProfit(){

@@ -132,10 +132,32 @@ def UpdateNow(key, tag, coin_name,):
     except Exception as e:
         print(e)
 
+#获取当前总资产
+def GetAmountAll(tag_name):
+    key = None 
+    if tag_name == "huobi_1":
+        key = key_main.key
+    elif tag_name == "huobi_2":
+        key = key_sub1.key
+    res = Post(key, '/linear-swap-api/v1/swap_cross_account_info', {})
+    if res["status"] == "ok" and len(res["data"]) != 0:      
+        time_now = time.localtime(time.time())
+        date_str = time.strftime("%Y-%m-%d", time_now)
+        #print(dateTime)
+        db = mysql_tools.GetDB()
+        db_cursor = db.cursor()
+        db_cursor.execute("delete from amount_history where tag = '%s' and timestamp='%s'"%(tag_name,date_str))
+        db_cursor.execute("insert into amount_history(tag, amount, timestamp) values('%s', %f, '%s')"%(tag_name, res['data'][0]["margin_balance"], date_str))
+        db.commit()
+        db_cursor.close()
+        db.close()
+
 if __name__ == "__main__":
     main_coin = ["DOGE", "XRP", "ZEC", "ALGO", "LINK","DOT"]
     sub1_coin = ["DOGE", "XRP", "ZEC", "ALGO", "LINK","DOT"]
     while True:
+        GetAmountAll('huobi_1')
+        GetAmountAll('huobi_2')
         for coin_item in main_coin:
             #买入平空
             UpdateHistory(key_main.key, "huobi_1", coin_item, 1)
@@ -153,3 +175,6 @@ if __name__ == "__main__":
             UpdateHistory(key_sub1.key, "huobi_2", coin_item, 4)
             UpdateNow(key_sub1.key, "huobi_2", coin_item)
             #time.sleep(1)
+        
+    
+    #print(timeArray)

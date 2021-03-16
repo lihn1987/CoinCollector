@@ -46,7 +46,7 @@ STEP_DO_PROFIT = 3
 order_coin = "DOGE"
 base_coin = "USDT"
 persent_list = [1, 1.5, 2.5, 5]
-step_list = [0, 0.03, 0.1, 0.2]
+step_list = None#[0, 0.03, 0.1, 0.2]
 
 
 org_price = 0
@@ -589,67 +589,41 @@ def ProcessArg():
         print("unknown key")
     if cmd == "start":
         persent_list = [1, 1.5, 2.5, 5]
-        tep_list = [0, 0.045, 0.108, 0.157]
+        step_list = [0, 0.045, 0.108, 0.157]
         base_coin = "USDT"
         coin_list = {
             "DOGE":{
-                "usdt_account": 300,
+                "usdt_account": 350,
                 "contract_size": 100,
                 "price_point": 5
             },
             "XRP":{
-                "usdt_account": 300,
+                "usdt_account": 350,
                 "contract_size": 10,
                 "price_point": 4
             },
-            "ETH":{
-                "usdt_account": 300,
-                "contract_size": 0.01,
-                "price_point": 2
-            },
             "ZEC":{
-                "usdt_account": 300,
+                "usdt_account": 350,
                 "contract_size": 0.1,
                 "price_point": 2
             },
             "ALGO":{
-                "usdt_account": 300,
+                "usdt_account": 350,
                 "contract_size": 10,
                 "price_point": 4
             },
             "LINK":{
-                "usdt_account": 300,
+                "usdt_account": 350,
                 "contract_size": 0.1,
                 "price_point": 4
             },
             "DOT":{
-                "usdt_account": 300,
+                "usdt_account": 350,
                 "contract_size": 1,
                 "price_point": 4
             },
-            "SNX":{
-                "usdt_account": 300,
-                "contract_size": 1,
-                "price_point": 4
-            },
-            "NEO":{
-                "usdt_account": 300,
-                "contract_size": 0.1,
-                "price_point": 3
-            }
         }
 
-        """
-        if coin_name == "DOGE":
-            order_coin = coin_name
-            base_coin = "USDT"
-            persent_list = [1, 1.5, 2.5, 5]
-            step_list = [0, 0.045, 0.10, 0.3]
-            usdt_account = 200
-            contract_size = 100
-            price_point = 5
-            print("开始交易%s-%s"%(order_coin, base_coin))
-        """
         if coin_name in coin_list:
             order_coin = coin_name
             base_coin = "USDT"
