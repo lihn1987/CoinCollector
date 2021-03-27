@@ -14,9 +14,9 @@ if ($conn->connect_error) {
 
 
 $sql = "
-    (select * from amount_history where tag = 'huobi_1' order by timestamp limit 0,1)
+    (select * from amount_history where tag = 'huobi_1' order by timestamp desc limit 0,1)
     union
-    (select * from amount_history where tag = 'huobi_2' order by timestamp limit 0,1);
+    (select * from amount_history where tag = 'huobi_2' order by timestamp desc limit 0,1);
 
 ";
 $result = $conn->query($sql);

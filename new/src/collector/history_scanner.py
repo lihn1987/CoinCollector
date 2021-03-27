@@ -17,7 +17,7 @@ import datetime
 
 import io
 import mysql_tools
-
+import copy
 def Post(key, path, args, show_log = False):
     while True:
         host = "api.hbdm.com"
@@ -79,7 +79,6 @@ def Post(key, path, args, show_log = False):
 trade_type: 3 buy, 4 sell
 """
 def UpdateHistory(key, tag, coin_name, trade_type):
-    print("start update %s"%(coin_name))
     count = 0
     try:
         page_size = 0
@@ -96,7 +95,7 @@ def UpdateHistory(key, tag, coin_name, trade_type):
             db_cursor = db.cursor()
             for trade_item in res["data"]["trades"]:
                 db_cursor.execute("insert into trade_history values('%s','%s','%s','%s', %d, %0.4f,%0.4f,%0.4f,%d)"%\
-                    (trade_item["id"], tag, coin_item, "USDT", trade_type, trade_item["real_profit"],trade_item["trade_turnover"], trade_item["trade_fee"], trade_item["create_date"]))
+                    (trade_item["id"], tag, coin_name, "USDT", trade_type, trade_item["real_profit"],trade_item["trade_turnover"], trade_item["trade_fee"], trade_item["create_date"]))
                 count += 1
                 db.commit()
             db_cursor.close()
@@ -107,7 +106,6 @@ def UpdateHistory(key, tag, coin_name, trade_type):
     print("end update %s:%d"%(coin_name, count))
 
 def UpdateNow(key, tag, coin_name,):
-    print("start update %s"%(coin_name))
     count = 0
     try:
         page_size = 0
@@ -119,11 +117,12 @@ def UpdateNow(key, tag, coin_name,):
         db_cursor = db.cursor()
         db_cursor.execute("delete from trade_now where tag='%s' and coin_order='%s'"%(tag, coin_name))
         if res["status"] == "ok" and len(res["data"]) != 0:
-            print("===================insert")
+            #print("===================insert")
             db_cursor.execute("insert into trade_now values('%s','%s','%s', '%s', %0.4f,%0.4f,%0.4f)"%\
-                (tag, coin_item, "USDT", res["data"][0]["direction"], res["data"][0]["profit"],res["data"][0]["profit_rate"],res["data"][0]["position_margin"]))
+                (tag, coin_name, "USDT", res["data"][0]["direction"], res["data"][0]["profit"],res["data"][0]["profit_rate"],res["data"][0]["position_margin"]))
         else:
-            print("===================delete")
+            #print("===================delete")
+            pass
         db.commit()
         db_cursor.close()
         db.close()
@@ -152,10 +151,40 @@ def GetAmountAll(tag_name):
         db_cursor.close()
         db.close()
 
+class ThreadGetAmount (threading.Thread):
+    def __init__(self, tag_name):
+        threading.Thread.__init__(self)
+        self.tag_name = tag_name
+
+    def run(self):
+        GetAmountAll(self.tag_name)
+
+class ThreadUpdateHistory (threading.Thread):
+    def __init__(self, key, tag, coin_name, trade_type):
+        threading.Thread.__init__(self)
+        self.key = key
+        self.tag = tag
+        self.coin_name = coin_name
+        self.trade_type = trade_type
+
+    def run(self):
+        UpdateHistory(self.key, self.tag, self.coin_name, self.trade_type)
+
+class ThreadUpdateNow(threading.Thread):
+    def __init__(self, key, tag, coin_name):
+        threading.Thread.__init__(self)
+        self.key = key
+        self.tag = tag
+        self.coin_name = coin_name
+
+    def run(self):
+        UpdateNow(self.key, self.tag, self.coin_name)
+
 if __name__ == "__main__":
     main_coin = ["DOGE", "XRP", "ZEC", "ALGO", "LINK","DOT"]
     sub1_coin = ["DOGE", "XRP", "ZEC", "ALGO", "LINK","DOT"]
     while True:
+        """
         GetAmountAll('huobi_1')
         GetAmountAll('huobi_2')
         for coin_item in main_coin:
@@ -175,6 +204,30 @@ if __name__ == "__main__":
             UpdateHistory(key_sub1.key, "huobi_2", coin_item, 4)
             UpdateNow(key_sub1.key, "huobi_2", coin_item)
             #time.sleep(1)
-        
-    
+        """
+        thread_list = []
+        thread_list.append(ThreadGetAmount('huobi_1'))
+        thread_list.append(ThreadGetAmount('huobi_2'))
+        for coin_item in main_coin:
+            #买入平空
+            thread_list.append(ThreadUpdateHistory(key_main.key, "huobi_1", coin_item, 1))
+            thread_list.append(ThreadUpdateHistory(key_main.key, "huobi_1", coin_item, 2))
+            thread_list.append(ThreadUpdateHistory(key_main.key, "huobi_1", coin_item, 3))
+            thread_list.append(ThreadUpdateHistory(key_main.key, "huobi_1", coin_item, 4))
+            thread_list.append(ThreadUpdateNow(key_main.key, "huobi_1", coin_item))
+            #time.sleep(1)
+
+        for coin_item in sub1_coin:
+            #买入平空
+            thread_list.append(ThreadUpdateHistory(key_sub1.key, "huobi_2", coin_item, 1))
+            thread_list.append(ThreadUpdateHistory(key_sub1.key, "huobi_2", coin_item, 2))
+            thread_list.append(ThreadUpdateHistory(key_sub1.key, "huobi_2", coin_item, 3))
+            thread_list.append(ThreadUpdateHistory(key_sub1.key, "huobi_2", coin_item, 4))
+            thread_list.append(ThreadUpdateNow(key_sub1.key, "huobi_2", coin_item))
+        print("start==================================================================================")
+        for item in thread_list:
+            item.start()
+        for item in thread_list:
+            item.join()
+        print("stop==================================================================================")
     #print(timeArray)

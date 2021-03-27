@@ -6,6 +6,7 @@ export default {
   data () {
     return {
       main_tb_index:"1",
+      username:'',
       config:[{
           name:"1",
           lbl:"火币账户1",
@@ -67,6 +68,7 @@ export default {
   mounted: function () {
     _this = this;
     let that = this
+    this.get_login_status()
     this.InitStatistic()
     this.FlushProfit()
     this.FlushProfitNow()
@@ -83,6 +85,20 @@ export default {
 
   },
   methods: {
+    //获取登录状态，如果没登录则跳到主页
+    get_login_status(){
+      let that = this;
+      axios.post("/coin_view/get_login_status.php").then(function(result){
+        console.log(result.data)
+        if(result.data.result != 0){
+          that.$router.push({path:'/login'});
+        }else{
+          that.username = result.data.username;
+        }
+      }).catch(function(){
+        that.$router.push({path:'/login'});
+      })
+    },
     InitStatistic(){
       this.config[0].statistic.start_time = Date.parse(new Date())-1000*60*60*24*7;
       this.config[1].statistic.start_time = Date.parse(new Date())-1000*60*60*24*7;
@@ -211,7 +227,6 @@ export default {
       console.log("OnReset", coin_name, index)
     },
     FlushECharts(n){
-      console.log(n)
       let echart_tmp = echarts.init(document.getElementById("echart"+n));
       axios.post("/coin_view/get_statistic_all.php", JSON.stringify(
         {
@@ -223,8 +238,6 @@ export default {
           }
         }
       )).then(function(data){
-        console.log(data)
-        console.log(_this.start_time)
         var result = data.data;
         var x_list = [], y_list = []
         for(var i = 0; i < result.length; i++){
@@ -241,8 +254,6 @@ export default {
               break;
           }
         }
-        console.log(x_list)
-        console.log(y_list)
         var option = {
             tooltip: {
                 trigger: 'axis',

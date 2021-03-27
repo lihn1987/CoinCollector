@@ -1,6 +1,9 @@
 <template>
   <div class="app" style = "min-width:1280px">
     <el-card>
+      {{username}}
+    </el-card>
+    <el-card style="margin-top:24px">
       <el-tabs v-model="main_tb_index" @tab-click="FlushECharts(2)">
         <el-tab-pane v-for="n in 2" :label="config[n-1].lbl" v-bind:key= "n" :name="config[n-1].name" style="text-align:center">
           <el-card style="width:1280px;margin:0 auto;margin-top:24px">
