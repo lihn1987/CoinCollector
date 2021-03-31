@@ -96,9 +96,9 @@ def CheckTime():
     while (now.hour == 23 and now.minute == 59 and now.second > 10) or\
         (now.hour == 7 and now.minute == 59 and now.second > 10) or\
         (now.hour == 15 and now.minute == 59 and now.second > 10) or\
-        (now.hour == 0 and now.minute < 4) or\
-        (now.hour == 8 and now.minute < 4) or\
-        (now.hour == 16 and now.minute < 4):
+        (now.hour == 0 and now.minute < 20) or\
+        (now.hour == 8 and now.minute < 10) or\
+        (now.hour == 16 and now.minute < 10):
         time.sleep(1)
         now = datetime.datetime.now()
 

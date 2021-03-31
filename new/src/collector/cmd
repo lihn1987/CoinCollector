@@ -9,20 +9,26 @@
 9 NEO         python3 huobi_contract.py --cmd=clear --coin=NEO --key=main; python3 huobi_contract.py --cmd=start --coin=NEO --key=main;
 
 
+sudo docker exec -it trade /bin/bash;cd data
+
+1 DOGE         python3 huobi_contract1.py --cmd=clear --coin=DOGE --key=main; python3 huobi_contract1.py --cmd=start --coin=DOGE --key=main;
+2 XRP         python3 huobi_contract1.py --cmd=clear --coin=XRP --key=main; python3 huobi_contract1.py --cmd=start --coin=XRP --key=main > /dev/null &
+3 ZEC         python3 huobi_contract1.py --cmd=clear --coin=ZEC --key=main; python3 huobi_contract1.py --cmd=start --coin=ZEC --key=main > /dev/null &
+4 ALGO         python3 huobi_contract1.py --cmd=clear --coin=ALGO --key=main; python3 huobi_contract1.py --cmd=start --coin=ALGO --key=main > /dev/null & 
+5 LINK        python3 huobi_contract1.py --cmd=clear --coin=LINK --key=main; python3 huobi_contract1.py --cmd=start --coin=LINK --key=main  > /dev/null &
+6 DOT         python3 huobi_contract1.py --cmd=clear --coin=DOT --key=main; python3 huobi_contract1.py --cmd=start --coin=DOT --key=main  > /dev/null &
 
 
-1 DOGE        python3 huobi_contract1.py --cmd=clear --coin=DOGE --key=main; python3 huobi_contract1.py --cmd=start --coin=DOGE --key=main;
-2 XRP         python3 huobi_contract1.py --cmd=clear --coin=XRP --key=main; python3 huobi_contract1.py --cmd=start --coin=XRP --key=main;
-3 ZEC         python3 huobi_contract1.py --cmd=clear --coin=ZEC --key=main; python3 huobi_contract1.py --cmd=start --coin=ZEC --key=main;
-4 ALGO        python3 huobi_contract1.py --cmd=clear --coin=ALGO --key=main; python3 huobi_contract1.py --cmd=start --coin=ALGO --key=main;
-5 LINK        python3 huobi_contract1.py --cmd=clear --coin=LINK --key=main; python3 huobi_contract1.py --cmd=start --coin=LINK --key=main;
-6 DOT         python3 huobi_contract1.py --cmd=clear --coin=DOT --key=main; python3 huobi_contract1.py --cmd=start --coin=DOT --key=main;
+7 DOGE        python3 huobi_contract1.py --cmd=clear --coin=DOGE --key=sub; python3 huobi_contract1.py --cmd=start --coin=DOGE --key=sub  > /dev/null &
+8 XRP         `` python3 huobi_contract1.py --cmd=clear --coin=XRP --key=sub; python3 huobi_contract1.py --cmd=start --coin=XRP --key=sub  > /dev/null &
+9 ZEC         `` python3 huobi_contract1.py --cmd=clear --coin=ZEC --key=sub; python3 huobi_contract1.py --cmd=start --coin=ZEC --key=sub  > /dev/null &
+10 ALGO       `` python3 huobi_contract1.py --cmd=clear --coin=ALGO --key=sub; python3 huobi_contract1.py --cmd=start --coin=ALGO --key=sub  > /dev/null & ;
+11 LINK       `` python3 huobi_contract1.py --cmd=clear --coin=LINK --key=sub; python3 huobi_contract1.py --cmd=start --coin=LINK --key=sub  > /dev/null &
+12 DOT        `` python3 huobi_contract1.py --cmd=clear --coin=DOT --key=sub; python3 huobi_contract1.py --cmd=start --coin=DOT --key=sub  > /dev/null &
 
-
-7 DOGE        python3 huobi_contract1.py --cmd=clear --coin=DOGE --key=sub; python3 huobi_contract1.py --cmd=start --coin=DOGE --key=sub;
-8 XRP         python3 huobi_contract1.py --cmd=clear --coin=XRP --key=sub; python3 huobi_contract1.py --cmd=start --coin=XRP --key=sub;
-9 ZEC         python3 huobi_contract1.py --cmd=clear --coin=ZEC --key=sub; python3 huobi_contract1.py --cmd=start --coin=ZEC --key=sub;
-10 ALGO       python3 huobi_contract1.py --cmd=clear --coin=ALGO --key=sub; python3 huobi_contract1.py --cmd=start --coin=ALGO --key=sub;
-11 LINK       python3 huobi_contract1.py --cmd=clear --coin=LINK --key=sub; python3 huobi_contract1.py --cmd=start --coin=LINK --key=sub;
-12 DOT        python3 huobi_contract1.py --cmd=clear --coin=DOT --key=sub; python3 huobi_contract1.py --cmd=start --coin=DOT --key=sub;
-
+CREATE TABLE IF NOT EXISTS `amount_history`(
+   `tag` varchar(255),
+   `amount` DECIMAL(10, 2),
+   `timestamp` varchar(255) NOT NULL,
+   PRIMARY KEY ( `timestamp`,`tag` )
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
