@@ -1,2 +1,2 @@
-numpy==1.19.4
+numpy==1.22.0
 websocket_client==0.57.0
